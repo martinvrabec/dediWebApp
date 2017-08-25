@@ -33,9 +33,8 @@ var Controller = {};
 				results.fullRangeMax = results.fullRange['max'];
 			}
 			context.displayRanges(document.getElementById("scatteringQuantity").value, document.getElementById("scatteringQuantityUnit").value);
-			document.getElementById("response").innerHTML = data;
 			PlottingSystem.createBeamlinePlot(beamline, document.getElementById("beamlineCanvas"), results);
-			PlottingSystem.createResultsBar(document.getElementById("resultsCanvas"), results);
+			PlottingSystem.createResultsBar(beamline, document.getElementById("resultsCanvas"), results);
 		});	
 	}
 	
@@ -71,9 +70,7 @@ var Controller = {};
 		beamline.maxWavelength = math.unit(beamline.maxWavelength, "nm").toNumber("m");
 		
 		// Default values not included in the template
-		$('#angleunit').val("deg");
-		$('#angle').val(90);
-		beamline.angle = math.unit(90, "deg").toNumber("rad");
+		beamline.angle = math.unit($('#angle').val(), $('#angleunit').val()).toNumber("rad");
  		$('#requestedMin').val(0);
 		$('#requestedMax').val(0);
 		beamline.requestedMin = 0;

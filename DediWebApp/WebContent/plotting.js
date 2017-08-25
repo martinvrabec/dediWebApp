@@ -20,6 +20,11 @@ var PlottingSystem = {};
 	 * Private methods.
 	 */
 	
+	function clearPlot(colour){
+		ctx.fillStyle = colour;
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+	}
+	
 	function drawLine(x1, y1, x2, y2, colour){
 		ctx.beginPath();
 		ctx.moveTo(x1, y1);
@@ -38,7 +43,8 @@ var PlottingSystem = {};
 	
 
 	function drawDetector(){
-		ctx.fillRect(0, 0, beamline.detector.numberOfPixelsX*scaleFactor, beamline.detector.numberOfPixelsY*scaleFactor, "blue")
+		ctx.fillStyle = "blue";
+		ctx.fillRect(0, 0, beamline.detector.numberOfPixelsX*scaleFactor, beamline.detector.numberOfPixelsY*scaleFactor);
 	}
 
 	
@@ -93,8 +99,30 @@ var PlottingSystem = {};
 		
 	}
 	
+	
 	function drawResultsBar(){
-		//alert("Drawing results bar");
+		if(!results.hasSolution){
+			ctx.fillStyle = "black";
+			ctx.font = "25px Arial";
+			ctx.fillText("No solution", canvas.width/2 - 100, canvas.height/2); 
+			return;
+		}
+		if(!results.isSatisfied)
+			ctx.fillStyle = "red";
+		else 
+			ctx.fillStyle = "green"
+				
+	   var offset = canvas.width/100;
+	   var slope = (canvas.width-120)/ (Math.log(results.fullRangeMax) - Math.log(results.fullRangeMin));
+       var minRequestedX = slope*(Math.log(beamline.requestedMin) - Math.log(results.fullRangeMin)) + offset;
+       var maxRequestedX = slope*(Math.log(beamline.requestedMax) - Math.log(results.fullRangeMin)) - offset;
+       var minValueX = slope*(Math.log(results.visibleMin) - Math.log(results.fullRangeMin)) + offset;
+	   var maxValueX = slope*(Math.log(results.visibleMax) - Math.log(results.fullRangeMin)) - offset;
+	   
+	   ctx.fillRect(minValueX, canvas.height/3, maxValueX - minValueX, canvas.height/3);
+	   ctx.lineWidth = 5;
+	   drawLine(minRequestedX, 5, minRequestedX, canvas.height, "black");
+	   drawLine(maxRequestedX, 5, maxRequestedX, canvas.height, "black");
 	}
 	
 	/*
@@ -110,8 +138,8 @@ var PlottingSystem = {};
 		scaleFactor = 500/maxSide;
 		canvas.width = beamline.detector.numberOfPixelsX*scaleFactor;
 		canvas.height = beamline.detector.numberOfPixelsY*scaleFactor;
-		canvas.style = "background-color:grey";
 		ctx = canvas.getContext("2d");
+		clearPlot("grey");
 		drawDetector();
 		drawCameraTube();
 		drawBeamstop();
@@ -120,9 +148,12 @@ var PlottingSystem = {};
 	};
 	
 	
-	context.createResultsBar = function(cvs, res){
+	context.createResultsBar = function(bl, cvs, res){
+		beamline = bl;
 		results = res;
-		canvas = cvs
+		canvas = cvs;
+		ctx = canvas.getContext("2d");
+		clearPlot("white");
 		drawResultsBar();
 	};
 	

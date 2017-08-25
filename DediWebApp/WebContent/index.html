@@ -4,15 +4,15 @@
 <meta charset="UTF-8">
 <title>Dedi</title>
 </head>
-<script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.3.3/angular.min.js"></script>
 <body>
 
+<script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.3.3/angular.min.js"></script>
 <script  src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script type="text/javascript" src="math.min.js"></script>
 <script type="text/javascript" src="scattering.js"></script>
-<script type="text/javascript" src="controller2.js"></script>
-<script type="text/javascript" src="plotting2.js"></script>
-<script type="text/javascript" src="preferences2.js"></script>
+<script type="text/javascript" src="controller.js"></script>
+<script type="text/javascript" src="plotting.js"></script>
+<script type="text/javascript" src="preferences.js"></script>
 
 
 <label> Select a pre-defined beamline configuration template: 
@@ -111,10 +111,10 @@ Pixel size: <label id="pixelSize"></label> (mm x mm) <br/>
 <hr>
 <label>
 	Angle:
-	<input id="angle" type="text" onfocus="this.oldValue = this.value;"
+	<input id="angle" type="text" value ="90" oldValue="90" onfocus="this.oldValue = this.value;"
 	       onchange="Controller.setAngle(); this.oldValue = this.value;">
 	<select id="angleunit" onchange="Controller.angleUnitChanged();">
-	    <option value="deg"> &deg; </option> 
+	    <option value="deg" selected="selected"> &deg; </option> 
 		<option value="rad"> rad </option>
 	</select>
 </label>
@@ -159,9 +159,9 @@ Requested {{SQ}} max:
 <br/>
 </p>
 
-<p id="response"></p>
 <canvas id="beamlineCanvas" width="400" height="400" style="background-color:black"></canvas>
 <br/>
-<canvas id="resultsCanvas" width="800" height="200" style="background-color:black"></canvas>
+<canvas id="resultsCanvas" width="800" height="200" 
+        style="background-color:grey;  border-style: solid;  border-color: black; border-width: 2px;"></canvas>
 </body>
 </html>
