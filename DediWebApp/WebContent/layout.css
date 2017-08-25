@@ -1,0 +1,16 @@
+@charset "UTF-8";
+
+#configurationPanel {
+    width: 800px;
+    float:left; 
+    border: 20px; 
+}
+
+#resultsPanel {
+	float:bottom;
+}
+
+#plot {
+    width: 800px;
+    overflow: hidden; 
+}

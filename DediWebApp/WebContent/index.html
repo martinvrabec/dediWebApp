@@ -2,6 +2,7 @@
 <html ng-app>
 <head>
 <meta charset="UTF-8">
+<link rel="stylesheet" href="layout.css">
 <title>Dedi</title>
 </head>
 <body>
@@ -15,17 +16,20 @@
 <script type="text/javascript" src="preferences.js"></script>
 
 
+<div id="configurationPanel">
+<div id="templatesPanel"></div>
 <label> Select a pre-defined beamline configuration template: 
 <select id="beamlineTemplatesCombo" onchange="Controller.setBeamlineTemplate();"></select>
 </label>
 <br/>
-<hr>
+</div>
+
 
 <label> Detector: <select id="detectorsCombo" onchange="Controller.setDetector();"></select> </label> <br/>
 Detector resolution: <label id="detectorResolution"></label> (height x width)<br/>
 Pixel size: <label id="pixelSize"></label> (mm x mm) <br/>
 
-<hr>
+<div id="beamstopPanel">
 <br>
 <label>
 	Beamstop diameter:
@@ -56,9 +60,10 @@ Pixel size: <label id="pixelSize"></label> (mm x mm) <br/>
 	       onchange="Controller.setClearance();">
 	(pixels)
 </label>
+</div>
 
 
-<hr>
+<div id="cameraTubePanel">
 <br>
 <label>
 	Camera tube diameter:
@@ -83,9 +88,10 @@ Pixel size: <label id="pixelSize"></label> (mm x mm) <br/>
 	(pixels)
 </label>
 <br/>
+</div>
 
 
-<hr>
+<div id="beamPropertiesPanel">
 <label>
 	Energy:
 	<input id="energy" type="text" onfocus="this.oldValue = this.value;"
@@ -105,30 +111,33 @@ Pixel size: <label id="pixelSize"></label> (mm x mm) <br/>
 		<option value="angstrom"> &#8491; </option>
 	</select>
 </label>
+</div>
 
 
-
-<hr>
+<div id="anglePanel">
 <label>
 	Angle:
-	<input id="angle" type="text" value ="90" oldValue="90" onfocus="this.oldValue = this.value;"
+	<input id="angle" type="text" value ="90" onfocus="this.oldValue = this.value;"
 	       onchange="Controller.setAngle(); this.oldValue = this.value;">
 	<select id="angleunit" onchange="Controller.angleUnitChanged();">
 	    <option value="deg" selected="selected"> &deg; </option> 
 		<option value="rad"> rad </option>
 	</select>
 </label>
+</div>
 
-<hr>
+
+<div id="cameraLengthPanel">
 <label>
 	Camera length:
 	<input id="cameraLength" type="number" min="1.2" max="9.7" step="0.25"
 	       onchange="Controller.setCameraLength();">  (m)
 </label>
-
 <hr> 
+</div>
 
-<p id="results">
+
+<div id="resultsPanel">
 <label>
 	Scattering Quantity:
 	<select id="scatteringQuantity" ng-model="SQ" onchange="Controller.scatteringQuantityChanged();">
@@ -157,11 +166,15 @@ Requested {{SQ}} max:
        onchange="Controller.setRequestedMax(); this.oldValue = this.value;"> <br/>
 </label>
 <br/>
-</p>
+</div>
+</div>
 
+
+<div id="plot">
 <canvas id="beamlineCanvas" width="400" height="400" style="background-color:black"></canvas>
 <br/>
 <canvas id="resultsCanvas" width="800" height="200" 
         style="background-color:grey;  border-style: solid;  border-color: black; border-width: 2px;"></canvas>
+</div>
 </body>
 </html>
