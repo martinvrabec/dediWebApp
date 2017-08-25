@@ -45,7 +45,7 @@ public class BeamlineConfigurationResultsServlet extends HttpServlet {
 	 */
     @Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		PrintWriter writer =  response.getWriter();
+    	PrintWriter writer =  response.getWriter();
 		
 		JSONObject obj = new JSONObject(request.getParameter("configuration"));
 		Gson gson = new GsonBuilder().create();
@@ -53,8 +53,6 @@ public class BeamlineConfigurationResultsServlet extends HttpServlet {
 		BeamlineConfiguration bc = new BeamlineConfiguration();
 		
 		try {
-			// Get the scattering quantity and unit ...
-			
 			// Get the beamline configuration
 			DiffractionDetector detector = gson.fromJson(obj.getJSONObject("detector").toString(), DiffractionDetector.class);
 			detector.setxPixelSize(Amount.valueOf(obj.getJSONObject("detector").getDouble("XPixelMM"), SI.MILLIMETRE));
@@ -82,19 +80,31 @@ public class BeamlineConfigurationResultsServlet extends HttpServlet {
 		
 		try {
 			bc.setCameraLength(obj.getDouble("cameraLength"));
+			bc.setMinCameraLength(obj.getDouble("minCameraLength"));
+			bc.setMaxCameraLength(obj.getDouble("maxCameraLength"));
 		} catch (JSONException e) {
 			bc.setCameraLength(null);
 		}
 		
 		try {
-			bc.setWavelength(obj.getDouble("energy"));
+			bc.setWavelength(obj.getDouble("wavelength"));
+			bc.setMinWavelength(obj.getDouble("minWavelength"));
+			bc.setMaxWavelength(obj.getDouble("maxWavelength"));
 		} catch (JSONException e) {
 			bc.setWavelength(null);
 		}
+		Double requestedMin;
+		Double requestedMax;
+		try {
+			requestedMin = obj.getDouble("requestedMin");
+			requestedMax = obj.getDouble("requestedMax");
+		} catch (JSONException e) {
+			requestedMin = null;
+			requestedMax = null;
+		}
 		
-		Results results = computeQRanges(bc);
+		Results results = computeQRanges(bc, requestedMin, requestedMax);
 		
-		//results.setVisibleRange(convertRange(results.setVisibleRange, SQ, unit)); etc.
 		
 		JSONObject res = new JSONObject(results);
 		writer.print(res);
@@ -111,8 +121,8 @@ public class BeamlineConfigurationResultsServlet extends HttpServlet {
 		doGet(request, response);
 	}
     
-    private Results computeQRanges(BeamlineConfiguration bc) {
-    	DiffractionDetector detector = bc.getDetector();
+    private Results computeQRanges(BeamlineConfiguration bc, Double requestedMin, Double requestedMax) {
+       	DiffractionDetector detector = bc.getDetector();
     	Double detectorWidthMM = bc.getDetectorWidthMM();
     	Double detectorHeightMM = bc.getDetectorHeightMM();
 		Double beamstopXCentreMM = bc.getBeamstopXCentreMM();
@@ -132,6 +142,7 @@ public class BeamlineConfigurationResultsServlet extends HttpServlet {
     	
 		
 		Results results = new Results();
+		
     	
 		// Find the intersection pt of the clearance region (beamstop + clearance) with a line at the given angle starting at the beamstop centre.
 		Vector2d initialPosition = new Vector2d(clearanceRegionMajorMM*Math.cos(angle) + beamstopXCentreMM, 
@@ -169,6 +180,12 @@ public class BeamlineConfigurationResultsServlet extends HttpServlet {
 			results.setVisibleRange(null, new Vector2d(ptMin), new Vector2d(ptMax));
 			results.setFullRange(null);
 			return results;
+		}
+		
+		
+		if(requestedMin != null && requestedMax != null) {
+			results.setRequestedRange(new NumericRange(requestedMin, requestedMax), getPtForQ(requestedMin, angle, beamstopXCentreMM, beamstopYCentreMM, cameraLength, wavelength),
+									  getPtForQ(requestedMax, angle, beamstopXCentreMM, beamstopYCentreMM, cameraLength, wavelength));
 		}
 		
 		
@@ -233,5 +250,21 @@ public class BeamlineConfigurationResultsServlet extends HttpServlet {
 		ScatteringQuantity newSQ = oldQuantity.to(newQuantity);
 		
 		return (newSQ == null) ? null : newSQ.getValue().to(newUnit).getEstimatedValue();
+	}
+	
+	
+	private Vector2d getPtForQ(double qvalue, double angle, double beamstopXCentreMM, 
+			                   double beamstopYCentreMM, double cameraLength, double wavelength){
+		Ray ray = new Ray(new Vector2d(Math.cos(angle), Math.sin(angle)), 
+				          new Vector2d(beamstopXCentreMM, beamstopYCentreMM));
+		
+		return ray.getPtAtDistance(1.0e3*calculateDistanceFromQValue(qvalue, cameraLength, wavelength));
+	}
+	
+	
+	private double calculateDistanceFromQValue(double qValue, double cameraLength, double wavelength){
+		double temp = wavelength*qValue/(4*Math.PI);
+		if(Math.abs(temp) > 1) throw new IllegalArgumentException();
+		return Math.tan(2*Math.asin(temp))*cameraLength;
 	}
 }

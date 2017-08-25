@@ -15,7 +15,6 @@ public class Results {
 	private Vector2d requestedRangeEndPoint;
 	
 	
-	
 	// Getters
 	public NumericRange getVisibleRange() {
 		return visibleRange;

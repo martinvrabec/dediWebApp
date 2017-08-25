@@ -35,8 +35,13 @@ var PlottingSystem = {};
 	    ctx.fillStyle = colour;
 	    ctx.fill();
 	}
+	
 
+	function drawDetector(){
+		ctx.fillRect(0, 0, beamline.detector.numberOfPixelsX*scaleFactor, beamline.detector.numberOfPixelsY*scaleFactor, "blue")
+	}
 
+	
 	function drawBeamstop(){
 		var x = beamline.beamstopXCentre*scaleFactor;
 		var y = beamline.beamstopYCentre*scaleFactor;
@@ -64,9 +69,23 @@ var PlottingSystem = {};
 		var visibleStartY = results.visibleRangeStartPoint[1]*scaleFactor/beamline.detector.XPixelMM;
 		var visibleEndX = results.visibleRangeEndPoint[0]*scaleFactor/beamline.detector.XPixelMM;
 		var visibleEndY = results.visibleRangeEndPoint[1]*scaleFactor/beamline.detector.XPixelMM;
+		
 		drawLine(beamline.beamstopXCentre*scaleFactor, beamline.beamstopYCentre*scaleFactor, 
 				visibleStartX, visibleStartY, "red");
-		drawLine(visibleStartX, visibleStartY, visibleEndX, visibleEndY, "brown");
+		
+		if(results.requestedRangeStartPoint !== undefined && results.requestedRangeEndPoint !== undefined 
+			&& results.isSatisfied){
+			var requestedStartX = results.requestedRangeStartPoint[0]*scaleFactor/beamline.detector.XPixelMM;
+			var requestedStartY = results.requestedRangeStartPoint[1]*scaleFactor/beamline.detector.XPixelMM;
+			var requestedEndX = results.requestedRangeEndPoint[0]*scaleFactor/beamline.detector.XPixelMM;
+			var requestedEndY = results.requestedRangeEndPoint[1]*scaleFactor/beamline.detector.XPixelMM;
+			
+			drawLine(visibleStartX, visibleStartY, requestedStartX, requestedStartY, "yellow");
+			drawLine(requestedStartX, requestedStartY, requestedEndX, requestedEndY, "green");
+			drawLine(requestedEndX, requestedEndY, 
+					visibleEndX, visibleEndY, "yellow");
+		}	
+		else drawLine(visibleStartX, visibleStartY, visibleEndX, visibleEndY, "yellow");
 	}
 	
 	
@@ -74,12 +93,15 @@ var PlottingSystem = {};
 		
 	}
 	
+	function drawResultsBar(){
+		//alert("Drawing results bar");
+	}
 	
 	/*
 	 * Public methods.
 	 */
 	
-	context.updatePlot = function(bl, cvs, res){
+	context.createBeamlinePlot = function(bl, cvs, res){
 		beamline = bl;
 		results = res;
 		canvas = cvs
@@ -88,12 +110,20 @@ var PlottingSystem = {};
 		scaleFactor = 500/maxSide;
 		canvas.width = beamline.detector.numberOfPixelsX*scaleFactor;
 		canvas.height = beamline.detector.numberOfPixelsY*scaleFactor;
-		canvas.style = "background-color:blue";
+		canvas.style = "background-color:grey";
 		ctx = canvas.getContext("2d");
+		drawDetector();
 		drawCameraTube();
 		drawBeamstop();
 		drawRay();
 		drawAxes();
+	};
+	
+	
+	context.createResultsBar = function(cvs, res){
+		results = res;
+		canvas = cvs
+		drawResultsBar();
 	};
 	
 })(PlottingSystem);

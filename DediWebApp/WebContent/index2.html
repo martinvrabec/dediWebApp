@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html ng-app>
+<head>
+<meta charset="UTF-8">
+<title>Dedi</title>
+</head>
+<script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.3.3/angular.min.js"></script>
+<body>
+
+<script  src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script type="text/javascript" src="math.min.js"></script>
+<script type="text/javascript" src="scattering.js"></script>
+<script type="text/javascript" src="controller2.js"></script>
+<script type="text/javascript" src="plotting2.js"></script>
+<script type="text/javascript" src="preferences2.js"></script>
+
+
+<label> Select a pre-defined beamline configuration template: 
+<select id="beamlineTemplatesCombo" onchange="Controller.setBeamlineTemplate();"></select>
+</label>
+<br/>
+<hr>
+
+<label> Detector: <select id="detectorsCombo" onchange="Controller.setDetector();"></select> </label> <br/>
+Detector resolution: <label id="detectorResolution"></label> (height x width)<br/>
+Pixel size: <label id="pixelSize"></label> (mm x mm) <br/>
+
+<hr>
+<br>
+<label>
+	Beamstop diameter:
+	<input id="bsdiameter" type="text" onchange="Controller.setBeamstopDiameter();" readonly="readonly">
+	<select id="bsdunit" onchange="Controller.bsDiameterUnitChanged();">
+		<option value="mm"> mm </option>
+		<option value="micrometer"> &micro;m </option> 
+	</select>
+</label>
+<br>
+<label>
+	Beamstop x position:
+	<input id="bsx" type="text" onfocus="this.oldValue = this.value;" 
+	       onchange="Controller.setBeamstopXCentre(); this.oldValue = this.value">
+	(pixels)
+</label>
+<br>
+<label>
+	Beamstop y position:
+	<input id="bsy" type="text" onfocus="this.oldValue = this.value;" 
+	       onchange="Controller.setBeamstopYCentre(); this.oldValue = this.value">
+	(pixels)
+</label>
+<br>
+<label>
+	Clearance:
+	<input id="clearance" type="number" min="0" max="1000" step="1"
+	       onchange="Controller.setClearance();">
+	(pixels)
+</label>
+
+
+<hr>
+<br>
+<label>
+	Camera tube diameter:
+	<input id="ctdiameter" type="text" onchange="Controller.setCameraTubeDiameter();" readonly="readonly">
+	<select id="ctdunit" onchange="Controller.ctDiameterUnitChanged();">
+		<option value="mm"> mm </option>
+		<option value="micrometer"> &micro;m </option> 
+	</select>
+</label>
+<br>
+<label>
+	Camera tube x position:
+	<input id="ctx" type="text" onfocus="this.oldValue = this.value;" 
+	       onchange="Controller.setCameraTubeXCentre(); this.oldValue = this.value;">
+	(pixels)
+</label>
+<br>
+<label>
+	Camera tube y position:
+	<input id="cty" type="text" onfocus="this.oldValue = this.value;"
+	       onchange="Controller.setCameraTubeYCentre(); this.oldValue = this.value;">
+	(pixels)
+</label>
+<br/>
+
+
+<hr>
+<label>
+	Energy:
+	<input id="energy" type="text" onfocus="this.oldValue = this.value;"
+	       onchange="Controller.setEnergy(); this.oldValue = this.value;">
+	<select id="energyunit" onchange="Controller.energyUnitChanged();">
+	    <option value="keV"> keV </option> 
+		<option value="eV"> eV </option>
+	</select>
+</label>
+<br/>
+<label>
+	Wavelength:
+	<input id="wavelength" type="text" onfocus="this.oldValue = this.value;" 
+	       onchange="Controller.setWavelength(); this.oldValue = this.value;">
+	<select id="wavelengthunit" onchange="Controller.wavelengthUnitChanged();">
+	    <option value="nm"> nm </option> 
+		<option value="angstrom"> &#8491; </option>
+	</select>
+</label>
+
+
+
+<hr>
+<label>
+	Angle:
+	<input id="angle" type="text" onfocus="this.oldValue = this.value;"
+	       onchange="Controller.setAngle(); this.oldValue = this.value;">
+	<select id="angleunit" onchange="Controller.angleUnitChanged();">
+	    <option value="deg"> &deg; </option> 
+		<option value="rad"> rad </option>
+	</select>
+</label>
+
+<hr>
+<label>
+	Camera length:
+	<input id="cameraLength" type="number" min="1.2" max="9.7" step="0.25"
+	       onchange="Controller.setCameraLength();">  (m)
+</label>
+
+<hr> 
+
+<p id="results">
+<label>
+	Scattering Quantity:
+	<select id="scatteringQuantity" ng-model="SQ" onchange="Controller.scatteringQuantityChanged();">
+	</select>
+	<select id="scatteringQuantityUnit" onchange="Controller.scatteringQuantityUnitChanged();">
+	</select>
+</label>
+<br/>
+
+
+Visible {{SQ}} min:
+<label class="sqValue" id="visibleMin"></label>
+<br/>
+Visible {{SQ}} max:
+<label class="sqValue" id="visibleMax"></label>
+<br/>
+<label>
+Requested {{SQ}} min:
+<input class="sqValue" id="requestedMin" type="text" onfocus="this.oldValue = this.value;"
+       onchange="Controller.setRequestedMin(); this.oldValue = this.value;"> <br/>
+</label>
+<br/>
+<label>
+Requested {{SQ}} max:
+<input class="sqValue" id="requestedMax" type="text" onfocus="this.oldValue = this.value;"
+       onchange="Controller.setRequestedMax(); this.oldValue = this.value;"> <br/>
+</label>
+<br/>
+</p>
+
+<p id="response"></p>
+<canvas id="beamlineCanvas" width="400" height="400" style="background-color:black"></canvas>
+<br/>
+<canvas id="resultsCanvas" width="800" height="200" style="background-color:black"></canvas>
+</body>
+</html>
