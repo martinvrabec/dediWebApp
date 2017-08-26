@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app>
+<html>
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="layout.css">
@@ -11,9 +11,58 @@
 <script src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script type="text/javascript" src="math.min.js"></script>
 <script type="text/javascript" src="scattering.js"></script>
-<script type="text/javascript" src="controller.js"></script>
 <script type="text/javascript" src="plotting.js"></script>
 <script type="text/javascript" src="preferences.js"></script>
+<script type="text/javascript" src="controller.js"></script>
+
+
+<script>
+var scatteringQuantities = angular.module("scatteringQuantities", []);
+scatteringQuantities.controller("scatteringQuantitiesController", function($scope){
+	$scope.scattering = scattering;
+	$scope.SQ = scattering.getScatteringQuantities()[0];
+	$scope.SQUnit = scattering.getUnitsFor($scope.SQ)[0].unit;
+	$scope.scatteringQuantityUnitChanged = function(){
+		Controller.scatteringQuantityUnitChanged($scope.SQ, $scope.SQUnit);
+	}
+});
+</script>
+
+<div id="resultsPanel" data-ng-app="scatteringQuantities" data-ng-controller="scatteringQuantitiesController">
+<label>
+	Scattering Quantity:
+	<select id="scatteringQuantity" data-ng-model="SQ" 
+	        data-ng-change="SQUnit=scattering.getUnitsFor(SQ)[0].unit; scatteringQuantityUnitChanged();">
+		<option data-ng-repeat="sq in scattering.getScatteringQuantities()">{{sq}}</option>
+	</select>
+	<select id="scatteringQuantityUnit" data-ng-model="SQUnit" data-ng-change="scatteringQuantityUnitChanged();">
+		<option data-ng-repeat="unit in scattering.getUnitsFor(SQ)" value="{{unit.unit}}">{{unit.label}}</option>
+	</select>
+</label>
+<br/>
+
+Visible {{SQ}} min:
+<label id="visibleMin"></label>
+<br/>
+Visible {{SQ}} max:
+<label id="visibleMax"></label>
+<br/>
+<label>
+Requested {{SQ}} min:
+<input id="requestedMin" type="text" onfocus="this.oldValue = this.value;"
+       onchange="Controller.setRequestedMin(); this.oldValue = this.value;"> <br/>
+</label>
+<br/>
+<label>
+Requested {{SQ}} max:
+<input id="requestedMax" type="text" onfocus="this.oldValue = this.value;"
+       onchange="Controller.setRequestedMax(); this.oldValue = this.value;"> <br/>
+</label>
+<br/>
+</div>
+
+
+
 
 
 <div id="configurationPanel">
@@ -138,36 +187,7 @@ Pixel size: <label id="pixelSize"></label> (mm x mm) <br/>
 </div>
 </div>
 
-<div id="resultsPanel">
-<label>
-	Scattering Quantity:
-	<select id="scatteringQuantity" ng-model="SQ" onchange="Controller.scatteringQuantityChanged();">
-	</select>
-	<select id="scatteringQuantityUnit" onchange="Controller.scatteringQuantityUnitChanged();">
-	</select>
-</label>
-<br/>
 
-
-Visible {{SQ}} min:
-<label class="sqValue" id="visibleMin"></label>
-<br/>
-Visible {{SQ}} max:
-<label class="sqValue" id="visibleMax"></label>
-<br/>
-<label>
-Requested {{SQ}} min:
-<input class="sqValue" id="requestedMin" type="text" onfocus="this.oldValue = this.value;"
-       onchange="Controller.setRequestedMin(); this.oldValue = this.value;"> <br/>
-</label>
-<br/>
-<label>
-Requested {{SQ}} max:
-<input class="sqValue" id="requestedMax" type="text" onfocus="this.oldValue = this.value;"
-       onchange="Controller.setRequestedMax(); this.oldValue = this.value;"> <br/>
-</label>
-<br/>
-</div>
 
 
 

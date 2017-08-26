@@ -5,17 +5,9 @@ var Controller = {};
 	var results = {};
 	
 	$(document).ready(function(){
-		var quantities = scattering.getScatteringQuantities();
-		/*var select = document.getElementById("scatteringQuantity");
-		for(var i in quantities){
-			var opt = document.createElement('option');
-			opt.value = quantities[i];
-            opt.innerHTML = quantities[i];
-            select.appendChild(opt);
-		}*/
 		preferenceService.loadPreferences();
-		$('#scatteringQuantity').val(quantities[0]).change();
 	});
+	
 	
 	/*
 	 * The main processing function that sends the data from the UI (stored in the variable beamline) 
@@ -264,20 +256,20 @@ var Controller = {};
 		var minVisible = results.visibleMin;
 		var maxVisible = results.visibleMax;
 		if(minVisible !== undefined && maxVisible !== undefined){
-			var convertedMinVisible = scattering.convertBetweenScatteringQuantities("q", minVisible, "m^-1", quantity, unit).toFixed(3);
-		    var convertedMaxVisible = scattering.convertBetweenScatteringQuantities("q", maxVisible, "m^-1", quantity, unit).toFixed(3);
-		    document.getElementById("visibleMin").innerHTML = Math.min(convertedMinVisible, convertedMaxVisible).toFixed(2);
-		    document.getElementById("visibleMax").innerHTML =  Math.max(convertedMinVisible, convertedMaxVisible).toFixed(2);
+			var convertedMinVisible = scattering.convertBetweenScatteringQuantities("q", minVisible, "m^-1", quantity, unit);
+		    var convertedMaxVisible = scattering.convertBetweenScatteringQuantities("q", maxVisible, "m^-1", quantity, unit);
+		    document.getElementById("visibleMin").innerHTML = Math.min(convertedMinVisible, convertedMaxVisible).toFixed(3);
+		    document.getElementById("visibleMax").innerHTML =  Math.max(convertedMinVisible, convertedMaxVisible).toFixed(3);
 		}
 				
 		var minRequested = beamline.requestedMin;
 		var maxRequested = beamline.requestedMax;
 		var convertedMinRequested = 
-			scattering.convertBetweenScatteringQuantities("q", minRequested, "m^-1", quantity, unit).toFixed(3);
+			scattering.convertBetweenScatteringQuantities("q", minRequested, "m^-1", quantity, unit);
 		var convertedMaxRequested = 
-			scattering.convertBetweenScatteringQuantities("q", maxRequested, "m^-1", quantity, unit).toFixed(3);
-		document.getElementById("requestedMin").value = Math.min(convertedMinRequested, convertedMaxRequested).toFixed(2);
-		document.getElementById("requestedMax").value = Math.max(convertedMinRequested, convertedMaxRequested).toFixed(2);	
+			scattering.convertBetweenScatteringQuantities("q", maxRequested, "m^-1", quantity, unit);
+		document.getElementById("requestedMin").value = Math.min(convertedMinRequested, convertedMaxRequested).toFixed(3);
+		document.getElementById("requestedMax").value = Math.max(convertedMinRequested, convertedMaxRequested).toFixed(3);	
 	}
 	
 	
@@ -321,25 +313,7 @@ var Controller = {};
 	};
 	
 	
-	context.scatteringQuantityChanged = function(){
-		var select = document.getElementById('scatteringQuantityUnit');
-		while (select.firstChild) {
-			select.removeChild(select.firstChild);
-		}
-		var units = scattering.getUnitsFor(document.getElementById("scatteringQuantity").value);
-        for(var i in units){
-         	var opt = document.createElement('option');
-            opt.value = units[i].unit;
-            opt.innerHTML = units[i].label;
-            select.appendChild(opt);
-        }
-        $('#scatteringQuantityUnit').val(units[0].unit).change();
-	};
-	
-	
-	context.scatteringQuantityUnitChanged = function(){
-		var unit = document.getElementById("scatteringQuantityUnit").value;
-		var quantity = document.getElementById("scatteringQuantity").value;
+	context.scatteringQuantityUnitChanged = function(quantity, unit){
 		context.displayRanges(quantity, unit);
 	};
 
