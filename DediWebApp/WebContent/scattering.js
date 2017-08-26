@@ -95,5 +95,5 @@ var scattering = {};
 	alert(convertFromQ("s", 2*Math.PI, "m^-1", "nm^-1")); // 10^-9*/
 	
 })(scattering);
-
+alert(scattering.getScatteringQuantities()[0]);
 

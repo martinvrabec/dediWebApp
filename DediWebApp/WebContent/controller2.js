@@ -5,17 +5,10 @@ var Controller = {};
 	var results = {};
 	
 	$(document).ready(function(){
-		var quantities = scattering.getScatteringQuantities();
-		/*var select = document.getElementById("scatteringQuantity");
-		for(var i in quantities){
-			var opt = document.createElement('option');
-			opt.value = quantities[i];
-            opt.innerHTML = quantities[i];
-            select.appendChild(opt);
-		}*/
+		alert("Loading preferences");
 		preferenceService.loadPreferences();
-		$('#scatteringQuantity').val(quantities[0]).change();
 	});
+	
 	
 	/*
 	 * The main processing function that sends the data from the UI (stored in the variable beamline) 
@@ -337,9 +330,7 @@ var Controller = {};
 	};
 	
 	
-	context.scatteringQuantityUnitChanged = function(){
-		var unit = document.getElementById("scatteringQuantityUnit").value;
-		var quantity = document.getElementById("scatteringQuantity").value;
+	context.scatteringQuantityUnitChanged = function(quantity, unit){
 		context.displayRanges(quantity, unit);
 	};
 
