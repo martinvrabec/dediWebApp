@@ -188,6 +188,7 @@ public class Ray {
 	 * Takes an arbitrary closed interval and restricts it to the interval [0, infinity]
 	 */
 	private NumericRange getParameterRange(NumericRange range) {
+		if(range == null) return null;
 		return getParameterRange(range.getMin(), range.getMax());
 	}
 }

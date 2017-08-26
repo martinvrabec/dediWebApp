@@ -1,15 +1,89 @@
 @charset "UTF-8";
 
-#configurationPanel {
-    width: 800px;
-    float:left; 
-    border: 20px; 
+.textPanel{
+	font-family : Arial, Helvetica, sans-serif;
+	font-size : 18px;
 }
+
+
+#configurationPanel {
+    width : 40%;
+	margin-bottom : 20px;
+	padding : 10px 20px 20px 10px ;
+	overflow : auto;
+	float : left;
+}
+
+
+.configurationPanelSection {
+	margin : 20px;
+	clear : both;
+	line-height: 1.4;
+}
+
+
+label {
+}
+
+
+.field {
+}
+
+
+.units {
+}
+
+
+input, select {
+	text-align : right;
+}
+
+
+select {
+	padding-right: 1%;
+}
+
 
 #resultsPanel {
-	float:bottom;
+	height : 30%;
+	width : 45%;
+	margin-top : 20px;
+	padding : 10px 20px 40px 10px;
+	clear : left;
 }
 
-#plot {
-    width: 800px;
+
+#scatteringQuantities {
+	padding : 10px 20px;
+	line-height: 1.4;
 }
+
+
+#resultsCanvas {
+	width : 70%;
+	height : 150px;
+	background-color: grey;  
+	border : thin solid grey;
+	border-radius : 25px; 
+}
+
+
+#plotPanel {
+    width : 45%;
+    height : 100%; 
+    padding : 20px;
+    float : right; 
+    text-align:center;
+}
+
+
+
+#beamlineCanvas {
+	background-color : black;
+	display : inline;
+}
+
+
+
+
+

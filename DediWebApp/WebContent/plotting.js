@@ -66,7 +66,7 @@ var PlottingSystem = {};
 		var diameterPixels = beamline.cameraTubeDiameter/2/beamline.detector.XPixelMM;
 		var diameter = scaleFactor*diameterPixels;
 		
-		drawCircle(diameter, x, y, "white");
+		drawCircle(diameter, x, y, "beige");
 	}
 	
 	
@@ -76,6 +76,7 @@ var PlottingSystem = {};
 		var visibleEndX = results.visibleRangeEndPoint[0]*scaleFactor/beamline.detector.XPixelMM;
 		var visibleEndY = results.visibleRangeEndPoint[1]*scaleFactor/beamline.detector.XPixelMM;
 		
+		ctx.lineWidth = 2;
 		drawLine(beamline.beamstopXCentre*scaleFactor, beamline.beamstopYCentre*scaleFactor, 
 				visibleStartX, visibleStartY, "red");
 		
@@ -86,25 +87,20 @@ var PlottingSystem = {};
 			var requestedEndX = results.requestedRangeEndPoint[0]*scaleFactor/beamline.detector.XPixelMM;
 			var requestedEndY = results.requestedRangeEndPoint[1]*scaleFactor/beamline.detector.XPixelMM;
 			
-			drawLine(visibleStartX, visibleStartY, requestedStartX, requestedStartY, "yellow");
+			drawLine(visibleStartX, visibleStartY, requestedStartX, requestedStartY, "orange");
 			drawLine(requestedStartX, requestedStartY, requestedEndX, requestedEndY, "green");
 			drawLine(requestedEndX, requestedEndY, 
-					visibleEndX, visibleEndY, "yellow");
+					visibleEndX, visibleEndY, "orange");
 		}	
-		else drawLine(visibleStartX, visibleStartY, visibleEndX, visibleEndY, "yellow");
-	}
-	
-	
-	function drawAxes(){
-		
+		else drawLine(visibleStartX, visibleStartY, visibleEndX, visibleEndY, "orange");
 	}
 	
 	
 	function drawResultsBar(){
 		if(!results.hasSolution){
 			ctx.fillStyle = "black";
-			ctx.font = "25px Arial";
-			ctx.fillText("No solution", canvas.width/2 - 100, canvas.height/2); 
+			ctx.font = "16px Arial";
+			ctx.fillText("No solution", canvas.width/2 - 50, canvas.height/2); 
 			return;
 		}
 		if(!results.isSatisfied)
@@ -112,15 +108,15 @@ var PlottingSystem = {};
 		else 
 			ctx.fillStyle = "green"
 				
-	   var offset = canvas.width/100;
-	   var slope = (canvas.width-120)/ (Math.log(results.fullRangeMax) - Math.log(results.fullRangeMin));
+	   var offset = canvas.width/1000;
+	   var slope = (canvas.width-2*offset)/ (Math.log(results.fullRangeMax) - Math.log(results.fullRangeMin));
        var minRequestedX = slope*(Math.log(beamline.requestedMin) - Math.log(results.fullRangeMin)) + offset;
        var maxRequestedX = slope*(Math.log(beamline.requestedMax) - Math.log(results.fullRangeMin)) - offset;
        var minValueX = slope*(Math.log(results.visibleMin) - Math.log(results.fullRangeMin)) + offset;
 	   var maxValueX = slope*(Math.log(results.visibleMax) - Math.log(results.fullRangeMin)) - offset;
 	   
 	   ctx.fillRect(minValueX, canvas.height/3, maxValueX - minValueX, canvas.height/3);
-	   ctx.lineWidth = 5;
+	   ctx.lineWidth = 2;
 	   drawLine(minRequestedX, 5, minRequestedX, canvas.height, "black");
 	   drawLine(maxRequestedX, 5, maxRequestedX, canvas.height, "black");
 	}
@@ -135,7 +131,7 @@ var PlottingSystem = {};
 		canvas = cvs
 		if(beamline === undefined || beamline.detector === undefined) return;
 		var maxSide = Math.max(beamline.detector.numberOfPixelsX, beamline.detector.numberOfPixelsY);
-		scaleFactor = 500/maxSide;
+		scaleFactor = 800/maxSide;
 		canvas.width = beamline.detector.numberOfPixelsX*scaleFactor;
 		canvas.height = beamline.detector.numberOfPixelsY*scaleFactor;
 		ctx = canvas.getContext("2d");
@@ -144,7 +140,6 @@ var PlottingSystem = {};
 		drawCameraTube();
 		drawBeamstop();
 		drawRay();
-		drawAxes();
 	};
 	
 	

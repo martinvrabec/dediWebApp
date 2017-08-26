@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet" href="layout.css">
+<link rel="stylesheet" type="text/css" href="layout.css">
+
 <title>Dedi</title>
 </head>
 <body>
@@ -16,6 +17,138 @@
 <script type="text/javascript" src="controller.js"></script>
 
 
+<div id="configurationPanel" class="textPanel">
+	<div class="configurationPanelSection" id="templatesPanel">
+		<div> 
+			<span> Select a pre-defined beamline configuration template: </span>
+			<select id="beamlineTemplatesCombo" onchange="Controller.setBeamlineTemplate();"></select>
+		</div>
+	</div>
+	
+	<div class="configurationPanelSection" id="detectorPanel">
+		<div> 
+			<label> Detector: </label>
+			<select class="field" id="detectorsCombo" onchange="Controller.setDetector();"></select> 
+		</div> 
+		<div>
+			<label> Detector resolution: </label>
+			<span class="field" id="detectorResolution"></span> 
+			<span class="units"> (height x width) </span>
+		</div>
+		<div>
+			<label> Pixel size: </label>
+			<span class="field" id="pixelSize"></span> 
+			<span class="units"> (mm x mm) </span>
+		</div>
+	</div>
+	
+	<div class="configurationPanelSection" id="beamstopPanel">
+		<div>
+			<label> Beamstop diameter: </label>
+			<input class="field" id="bsdiameter" type="text" onchange="Controller.setBeamstopDiameter();" readonly="readonly">
+			<select class="units" id="bsdunit" onchange="Controller.bsDiameterUnitChanged();">
+				<option value="mm"> mm </option>
+				<option value="micrometer"> &micro;m </option> 
+			</select>
+		</div>
+		<div>
+			<label> Beamstop x position: </label>
+			<input class="field" id="bsx" type="text" onfocus="this.oldValue = this.value;" 
+			       onchange="Controller.setBeamstopXCentre(); this.oldValue = this.value">
+			<span class="units"> (pixels) </span>
+		</div>
+		<div>
+			<label> Beamstop y position: </label>
+			<input class="field" id="bsy" type="text" onfocus="this.oldValue = this.value;" 
+			       onchange="Controller.setBeamstopYCentre(); this.oldValue = this.value">
+			<span class="units"> (pixels) </span>
+		</div>
+		<div>
+			<label> Clearance: </label>
+			<input class="field" id="clearance" type="number" min="0" max="1000" step="1"
+			       onchange="Controller.setClearance();">
+			<span class="units"> (pixels) </span>
+		</div>
+	</div>
+	
+	
+	<div class="configurationPanelSection" id="cameraTubePanel">
+		<div>
+			<label> Camera tube diameter: </label>
+			<input class="field" id="ctdiameter" type="text" onchange="Controller.setCameraTubeDiameter();" readonly="readonly">
+			<select class="units" id="ctdunit" onchange="Controller.ctDiameterUnitChanged();">
+				<option value="mm"> mm </option>
+				<option value="micrometer"> &micro;m </option> 
+			</select>
+		</div>
+		<div>
+			<label> Camera tube x position: </label>
+			<input class="field" id="ctx" type="text" onfocus="this.oldValue = this.value;" 
+			       onchange="Controller.setCameraTubeXCentre(); this.oldValue = this.value;">
+			<span class="units"> (pixels) </span>
+		</div>
+		<div>
+			<label> Camera tube y position: </label>
+			<input class="field" id="cty" type="text" onfocus="this.oldValue = this.value;"
+			       onchange="Controller.setCameraTubeYCentre(); this.oldValue = this.value;">
+			<span class="units"> (pixels) </span>
+		</div>
+	</div>
+	
+	
+	<div class="configurationPanelSection" id="beamPropertiesPanel">
+		<div>
+			Energy:
+			<input id="energy" type="text" onfocus="this.oldValue = this.value;"
+			       onchange="Controller.setEnergy(); this.oldValue = this.value;">
+			<select id="energyunit" onchange="Controller.energyUnitChanged();">
+			    <option value="keV"> keV </option> 
+				<option value="eV"> eV </option>
+			</select>
+		</div>
+		<div>
+			<label> Wavelength: </label>
+			<input class="field" id="wavelength" type="text" onfocus="this.oldValue = this.value;" 
+			       onchange="Controller.setWavelength(); this.oldValue = this.value;">
+			<select id="wavelengthunit" onchange="Controller.wavelengthUnitChanged();">
+			    <option value="nm"> nm </option> 
+				<option value="angstrom"> &#8491; </option>
+			</select>
+		</div>
+	</div>
+	
+	
+	<div class="configurationPanelSection" id="anglePanel">
+		<div>
+			<label> Angle: </label>
+			<input class="field" id="angle" type="text" value ="90" onfocus="this.oldValue = this.value;"
+			       onchange="Controller.setAngle(); this.oldValue = this.value;">
+			<select id="angleunit" onchange="Controller.angleUnitChanged();">
+			    <option value="deg" selected="selected"> &deg; </option> 
+				<option value="rad"> rad </option>
+			</select>
+		</div>
+	</div>
+	
+	
+	<div class="configurationPanelSection" id="cameraLengthPanel">
+		<div>
+			<label> Camera length: </label>
+			<input class="field" id="cameraLength" type="number" min="1.2" max="9.7" step="0.25"
+			       onchange="Controller.setCameraLength();">  
+			<span class="units"> (m) </span>
+		</div>
+	</div>
+</div>
+
+
+
+<div id="plotPanel">
+	<canvas id="beamlineCanvas"></canvas>
+</div>
+
+
+
 <script>
 var scatteringQuantities = angular.module("scatteringQuantities", []);
 scatteringQuantities.controller("scatteringQuantitiesController", function($scope){
@@ -23,179 +156,45 @@ scatteringQuantities.controller("scatteringQuantitiesController", function($scop
 	$scope.SQ = scattering.getScatteringQuantities()[0];
 	$scope.SQUnit = scattering.getUnitsFor($scope.SQ)[0].unit;
 	$scope.scatteringQuantityUnitChanged = function(){
-		Controller.scatteringQuantityUnitChanged($scope.SQ, $scope.SQUnit);
+		Controller.displayRanges($scope.SQ, $scope.SQUnit);
 	}
 });
 </script>
 
-<div id="resultsPanel" data-ng-app="scatteringQuantities" data-ng-controller="scatteringQuantitiesController">
-<label>
-	Scattering Quantity:
-	<select id="scatteringQuantity" data-ng-model="SQ" 
-	        data-ng-change="SQUnit=scattering.getUnitsFor(SQ)[0].unit; scatteringQuantityUnitChanged();">
-		<option data-ng-repeat="sq in scattering.getScatteringQuantities()">{{sq}}</option>
-	</select>
-	<select id="scatteringQuantityUnit" data-ng-model="SQUnit" data-ng-change="scatteringQuantityUnitChanged();">
-		<option data-ng-repeat="unit in scattering.getUnitsFor(SQ)" value="{{unit.unit}}">{{unit.label}}</option>
-	</select>
-</label>
-<br/>
-
-Visible {{SQ}} min:
-<label id="visibleMin"></label>
-<br/>
-Visible {{SQ}} max:
-<label id="visibleMax"></label>
-<br/>
-<label>
-Requested {{SQ}} min:
-<input id="requestedMin" type="text" onfocus="this.oldValue = this.value;"
-       onchange="Controller.setRequestedMin(); this.oldValue = this.value;"> <br/>
-</label>
-<br/>
-<label>
-Requested {{SQ}} max:
-<input id="requestedMax" type="text" onfocus="this.oldValue = this.value;"
-       onchange="Controller.setRequestedMax(); this.oldValue = this.value;"> <br/>
-</label>
-<br/>
+<div id="resultsPanel" class="textPanel">
+	<div id="scatteringQuantities" data-ng-app="scatteringQuantities" data-ng-controller="scatteringQuantitiesController">
+		<div>
+			<label> Scattering Quantity: </label>
+			<select id="scatteringQuantity" data-ng-model="SQ" 
+			        data-ng-change="SQUnit=scattering.getUnitsFor(SQ)[0].unit; scatteringQuantityUnitChanged();">
+				<option data-ng-repeat="sq in scattering.getScatteringQuantities()">{{sq}}</option>
+			</select>
+			<select id="scatteringQuantityUnit" data-ng-model="SQUnit" data-ng-change="scatteringQuantityUnitChanged();">
+				<option data-ng-repeat="unit in scattering.getUnitsFor(SQ)" value="{{unit.unit}}">{{unit.label}}</option>
+			</select>
+		</div>
+		
+		<div>
+			<label> Visible {{SQ}} min: </label>
+			<span class="field" id="visibleMin"></span>
+		</div>
+		<div>
+			<label> Visible {{SQ}} max: </label>
+			<span class="field" id="visibleMax"></span>
+		</div>
+		<div>
+			<label> Requested {{SQ}} min: </label>
+			<input class="field" id="requestedMin" type="text" onfocus="this.oldValue = this.value;"
+			       onchange="Controller.setRequestedMin(); this.oldValue = this.value;">
+		</div>
+		<div>
+			<label> Requested {{SQ}} max: </label>
+			<input class="field" id="requestedMax" type="text" onfocus="this.oldValue = this.value;"
+			       onchange="Controller.setRequestedMax(); this.oldValue = this.value;">
+		</div>
+	</div>
+	<canvas id="resultsCanvas"></canvas>
 </div>
 
-
-
-
-
-<div id="configurationPanel">
-<div id="templatesPanel">
-<label> Select a pre-defined beamline configuration template: 
-<select id="beamlineTemplatesCombo" onchange="Controller.setBeamlineTemplate();"></select>
-</label>
-<br/>
-</div>
-
-<div id="detectorPanel">
-<label> Detector: <select id="detectorsCombo" onchange="Controller.setDetector();"></select> </label> <br/>
-Detector resolution: <label id="detectorResolution"></label> (height x width)<br/>
-Pixel size: <label id="pixelSize"></label> (mm x mm) <br/>
-<br>
-</div>
-
-<div id="beamstopPanel">
-<label>
-	Beamstop diameter:
-	<input id="bsdiameter" type="text" onchange="Controller.setBeamstopDiameter();" readonly="readonly">
-	<select id="bsdunit" onchange="Controller.bsDiameterUnitChanged();">
-		<option value="mm"> mm </option>
-		<option value="micrometer"> &micro;m </option> 
-	</select>
-</label>
-<br>
-<label>
-	Beamstop x position:
-	<input id="bsx" type="text" onfocus="this.oldValue = this.value;" 
-	       onchange="Controller.setBeamstopXCentre(); this.oldValue = this.value">
-	(pixels)
-</label>
-<br>
-<label>
-	Beamstop y position:
-	<input id="bsy" type="text" onfocus="this.oldValue = this.value;" 
-	       onchange="Controller.setBeamstopYCentre(); this.oldValue = this.value">
-	(pixels)
-</label>
-<br>
-<label>
-	Clearance:
-	<input id="clearance" type="number" min="0" max="1000" step="1"
-	       onchange="Controller.setClearance();">
-	(pixels)
-</label>
-</div>
-
-
-<div id="cameraTubePanel">
-<br>
-<label>
-	Camera tube diameter:
-	<input id="ctdiameter" type="text" onchange="Controller.setCameraTubeDiameter();" readonly="readonly">
-	<select id="ctdunit" onchange="Controller.ctDiameterUnitChanged();">
-		<option value="mm"> mm </option>
-		<option value="micrometer"> &micro;m </option> 
-	</select>
-</label>
-<br>
-<label>
-	Camera tube x position:
-	<input id="ctx" type="text" onfocus="this.oldValue = this.value;" 
-	       onchange="Controller.setCameraTubeXCentre(); this.oldValue = this.value;">
-	(pixels)
-</label>
-<br>
-<label>
-	Camera tube y position:
-	<input id="cty" type="text" onfocus="this.oldValue = this.value;"
-	       onchange="Controller.setCameraTubeYCentre(); this.oldValue = this.value;">
-	(pixels)
-</label>
-<br/>
-</div>
-
-
-<div id="beamPropertiesPanel">
-<label>
-	Energy:
-	<input id="energy" type="text" onfocus="this.oldValue = this.value;"
-	       onchange="Controller.setEnergy(); this.oldValue = this.value;">
-	<select id="energyunit" onchange="Controller.energyUnitChanged();">
-	    <option value="keV"> keV </option> 
-		<option value="eV"> eV </option>
-	</select>
-</label>
-<br/>
-<label>
-	Wavelength:
-	<input id="wavelength" type="text" onfocus="this.oldValue = this.value;" 
-	       onchange="Controller.setWavelength(); this.oldValue = this.value;">
-	<select id="wavelengthunit" onchange="Controller.wavelengthUnitChanged();">
-	    <option value="nm"> nm </option> 
-		<option value="angstrom"> &#8491; </option>
-	</select>
-</label>
-</div>
-
-
-<div id="anglePanel">
-<label>
-	Angle:
-	<input id="angle" type="text" value ="90" onfocus="this.oldValue = this.value;"
-	       onchange="Controller.setAngle(); this.oldValue = this.value;">
-	<select id="angleunit" onchange="Controller.angleUnitChanged();">
-	    <option value="deg" selected="selected"> &deg; </option> 
-		<option value="rad"> rad </option>
-	</select>
-</label>
-</div>
-
-
-<div id="cameraLengthPanel">
-<label>
-	Camera length:
-	<input id="cameraLength" type="number" min="1.2" max="9.7" step="0.25"
-	       onchange="Controller.setCameraLength();">  (m)
-</label>
-<hr> 
-</div>
-</div>
-
-
-
-
-
-<div id="plot">
-<canvas id="beamlineCanvas" width="400" height="400" style="background-color:black"></canvas>
-<br/>
-<canvas id="resultsCanvas" width="800" height="200" 
-        style="background-color:grey;  border-style: solid;  border-color: black; border-width: 2px;"></canvas>
-</div>
 </body>
 </html>

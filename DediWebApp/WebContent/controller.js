@@ -312,9 +312,4 @@ var Controller = {};
 		}
 	};
 	
-	
-	context.scatteringQuantityUnitChanged = function(quantity, unit){
-		context.displayRanges(quantity, unit);
-	};
-
 })(Controller);
