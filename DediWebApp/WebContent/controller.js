@@ -29,7 +29,7 @@ var controller = {};
 			redrawConfigurationPlot();
 		});
 		
-		$('input[name="zoom"]').click(function() {
+		$('input[name="zoom"]').change(function() {
 			redrawConfigurationPlot();
 		});
 		
@@ -40,20 +40,29 @@ var controller = {};
 		var canvasX = 0;
 		var canvasY = 0;
 		
-		$("#beamlineCanvas")[0].addEventListener("mousedown", canvasMouseDown, false);
-		$("#beamlineCanvas")[0].addEventListener("mouseup", canvasMouseUp, false);
+		var $canvas = $("#beamlineCanvas")[0];
 		
-		function canvasMouseDown(event){
+		$canvas.addEventListener("mousedown", function(event){
 			canvasX = event.pageX;
 			canvasY = event.pageY;
-		}
+		}, false);
 		
-		function canvasMouseUp(event){
+		$canvas.addEventListener("mouseup", function(event){
 			offsetX += event.pageX - canvasX;
 			offsetY += event.pageY - canvasY;
 			redrawConfigurationPlot();
-		}
+		}, false);
 		
+		$canvas.addEventListener('mousewheel', function(event) {
+			event.preventDefault();
+			$('input[name="zoom"]').val(parseFloat($('input[name="zoom"]').val()) + 10*Math.sign(event.wheelDelta)).change();
+		}, false);
+		
+		$canvas.addEventListener('DOMMouseScroll', function(event) {
+			event.preventDefault();
+			$('input[name="zoom"]').val(parseFloat($('input[name="zoom"]').val()) - 10*Math.sign(event.detail)).change();
+		}, false);
+	
 		$('input[name="axes"]').prop('disabled', true);
 	});
 	
