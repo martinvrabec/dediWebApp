@@ -72,6 +72,8 @@ var plottingSystem = {};
 	
 	
 	function drawRay(){
+		if(results.visibleRangeStartPoint === undefined || results.visibleRangeEndPoint === undefined) return;
+		
 		var visibleStartX = results.visibleRangeStartPoint[0]*scaleFactor/beamline.detector.XPixelMM;
 		var visibleStartY = results.visibleRangeStartPoint[1]*scaleFactor/beamline.detector.XPixelMM;
 		var visibleEndX = results.visibleRangeEndPoint[0]*scaleFactor/beamline.detector.XPixelMM;
@@ -94,6 +96,51 @@ var plottingSystem = {};
 					visibleEndX, visibleEndY, "orange");
 		}	
 		else drawLine(visibleStartX, visibleStartY, visibleEndX, visibleEndY, "orange");
+	}
+	
+	
+	function drawAxes(){
+		if(beamline.wavelength === undefined || beamline.cameraLength === undefined){
+			$('#axes').hide();
+			return;
+		}
+		
+		$('#axes').show();
+		
+		ctx.fillStyle = "black";
+		ctx.font = "14px Arial";
+		
+		var x0 = beamline.beamstopXCentre*scaleFactor;
+		var y0 = beamline.beamstopYCentre*scaleFactor;
+		
+		var dx = scaleFactor*beamline.wavelength*beamline.cameraLength*1e12/(2*Math.PI)/beamline.detector.XPixelMM;
+		var dy = dx;
+		
+		var i = 0;
+		while(x0 + i*dx < canvas.width){
+			drawLine(x0 + i*dx, canvas.height, x0 + i*dx, canvas.height - 10, "black");
+			ctx.fillText(i, x0 + i*dx, canvas.height-15); 
+			i++;
+		}
+		i = -1;
+		while(x0 + i*dx > 0){
+			drawLine(x0 + i*dx, canvas.height, x0 + i*dx, canvas.height - 10, "black");
+			ctx.fillText(i, x0 + i*dx, canvas.height-15); 
+			i--;
+		}
+		
+		var i = 0;
+		while(y0 + i*dy < canvas.height){
+			drawLine(0, y0 + i*dy, 10, y0 + i*dy, "black");
+			ctx.fillText(i, 15, y0 + i*dy); 
+			i++;
+		}
+		i = -1;
+		while(y0 + i*dy > 0){
+			drawLine(0, y0 + i*dy, 10, y0 + i*dy, "black");
+			ctx.fillText(i, 15, y0 + i*dy);
+			i--;
+		}
 	}
 	
 	
@@ -146,7 +193,8 @@ var plottingSystem = {};
 		drawDetector();
 		drawCameraTube();
 		drawBeamstop();
-		if(results.visibleRangeStartPoint !== undefined || results.visibleRangeEndPoint !== undefined) drawRay();
+		drawRay();
+		drawAxes();
 	};
 	
 	
