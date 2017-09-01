@@ -4,6 +4,8 @@ var controller = {};
 	var beamline = {};
 	var results = {};
 	
+	var offsetX = 0;
+	var offsetY = 0;
 	
 	$(document).ready(function(){
 		// Populate the UI with default values that are not part of the preferences service
@@ -35,7 +37,22 @@ var controller = {};
 			return false;
 		});
 		
+		var canvasX = 0;
+		var canvasY = 0;
 		
+		$("#beamlineCanvas")[0].addEventListener("mousedown", canvasMouseDown, false);
+		$("#beamlineCanvas")[0].addEventListener("mouseup", canvasMouseUp, false);
+		
+		function canvasMouseDown(event){
+			canvasX = event.pageX;
+			canvasY = event.pageY;
+		}
+		
+		function canvasMouseUp(event){
+			offsetX += event.pageX - canvasX;
+			offsetY += event.pageY - canvasY;
+			redrawConfigurationPlot();
+		}
 		
 		$('input[name="axes"]').prop('disabled', true);
 	});
@@ -69,7 +86,7 @@ var controller = {};
 	function redrawConfigurationPlot(){
 		plottingSystem.createBeamlinePlot(beamline, $("#beamlineCanvas")[0], results, 
 				$('input[name="axes"]').is(':checked'), $('input[name="mask"]').is(':checked'), 
-				$('input[name="zoom"]').val()/100);
+				$('input[name="zoom"]').val()/100, offsetX, offsetY);
 	}
 	
 	
