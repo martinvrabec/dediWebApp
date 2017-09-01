@@ -83,17 +83,6 @@ var scattering = {};
 			return convertFromQ(newQuantity, convertToQ(oldQuantity, oldQuantityValue, oldQuantityUnit, "m^-1"), "m^-1", newQuantityUnit);
 	};
 	
-	
-	
-	/*alert(convertQToD(2*Math.PI, "m^-1", "nm")); // 10^9
-	alert(convertDToQ(2*Math.PI, "m", "m^-1"));  // 1
-	alert(convertToQ("q", 1, "m^-1", "nm^-1"));  // 10^-9
-	alert(convertToQ("s", 1, "m^-1", "m^-1"));   // 2*pi
-	alert(convertToQ("d", 2*Math.PI, "m", "m^-1")); // 1
-	alert(convertFromQ("q", 1, "m^-1", "nm^-1")); // 10^-9
-	alert(convertFromQ("d", 2*Math.PI, "m^-1", "nm")); // 10^9
-	alert(convertFromQ("s", 2*Math.PI, "m^-1", "nm^-1")); // 10^-9*/
-	
 })(scattering);
 
 

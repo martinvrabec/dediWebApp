@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <link rel="stylesheet" type="text/css" href="layout.css">
 
-<title>Dedi</title>
+<title>Q-range calculator</title>
 </head>
 <body>
 
@@ -17,18 +17,18 @@
 <script type="text/javascript" src="controller.js"></script>
 
 
-<div id="configurationPanel" class="textPanel">
+<div class="textPanel" id="configurationPanel">
 	<div class="configurationPanelSection" id="templatesPanel">
 		<div> 
 			<span> Select a pre-defined beamline configuration template: </span>
-			<select id="beamlineTemplatesCombo" onchange="Controller.setBeamlineTemplate();"></select>
+			<select id="beamlineTemplatesCombo" onchange="controller.setBeamlineTemplate();"></select>
 		</div>
 	</div>
 	
 	<div class="configurationPanelSection" id="detectorPanel">
 		<div> 
 			<label> Detector: </label>
-			<select class="field" id="detectorsCombo" onchange="Controller.setDetector();"></select> 
+			<select class="field" id="detectorsCombo" onchange="controller.setDetector();"></select> 
 		</div> 
 		<div>
 			<label> Detector resolution: </label>
@@ -45,8 +45,8 @@
 	<div class="configurationPanelSection" id="beamstopPanel">
 		<div>
 			<label> Beamstop diameter: </label>
-			<input class="field" id="bsdiameter" type="text" onchange="Controller.setBeamstopDiameter();" readonly="readonly">
-			<select class="units" id="bsdunit" onchange="Controller.bsDiameterUnitChanged();">
+			<input class="field" id="bsdiameter" type="text" readonly="readonly">
+			<select class="units" id="bsdunit" onchange="controller.bsDiameterUnitChanged();">
 				<option value="mm"> mm </option>
 				<option value="micrometer"> &micro;m </option> 
 			</select>
@@ -54,19 +54,19 @@
 		<div>
 			<label> Beamstop x position: </label>
 			<input class="field" id="bsx" type="text" onfocus="this.oldValue = this.value;" 
-			       onchange="Controller.setBeamstopXCentre(); this.oldValue = this.value">
+			       onchange="controller.setBeamstopXCentre(); this.oldValue = this.value">
 			<span class="units"> (pixels) </span>
 		</div>
 		<div>
 			<label> Beamstop y position: </label>
 			<input class="field" id="bsy" type="text" onfocus="this.oldValue = this.value;" 
-			       onchange="Controller.setBeamstopYCentre(); this.oldValue = this.value">
+			       onchange="controller.setBeamstopYCentre(); this.oldValue = this.value">
 			<span class="units"> (pixels) </span>
 		</div>
 		<div>
 			<label> Clearance: </label>
 			<input class="field" id="clearance" type="number" min="0" max="1000" step="1"
-			       onchange="Controller.setClearance();">
+			       onchange="controller.setClearance();">
 			<span class="units"> (pixels) </span>
 		</div>
 	</div>
@@ -75,8 +75,8 @@
 	<div class="configurationPanelSection" id="cameraTubePanel">
 		<div>
 			<label> Camera tube diameter: </label>
-			<input class="field" id="ctdiameter" type="text" onchange="Controller.setCameraTubeDiameter();" readonly="readonly">
-			<select class="units" id="ctdunit" onchange="Controller.ctDiameterUnitChanged();">
+			<input class="field" id="ctdiameter" type="text" readonly="readonly">
+			<select class="units" id="ctdunit" onchange="controller.ctDiameterUnitChanged();">
 				<option value="mm"> mm </option>
 				<option value="micrometer"> &micro;m </option> 
 			</select>
@@ -84,13 +84,13 @@
 		<div>
 			<label> Camera tube x position: </label>
 			<input class="field" id="ctx" type="text" onfocus="this.oldValue = this.value;" 
-			       onchange="Controller.setCameraTubeXCentre(); this.oldValue = this.value;">
+			       onchange="controller.setCameraTubeXCentre(); this.oldValue = this.value;">
 			<span class="units"> (pixels) </span>
 		</div>
 		<div>
 			<label> Camera tube y position: </label>
 			<input class="field" id="cty" type="text" onfocus="this.oldValue = this.value;"
-			       onchange="Controller.setCameraTubeYCentre(); this.oldValue = this.value;">
+			       onchange="controller.setCameraTubeYCentre(); this.oldValue = this.value;">
 			<span class="units"> (pixels) </span>
 		</div>
 	</div>
@@ -100,8 +100,8 @@
 		<div>
 			Energy:
 			<input id="energy" type="text" onfocus="this.oldValue = this.value;"
-			       onchange="Controller.setEnergy(); this.oldValue = this.value;">
-			<select id="energyunit" onchange="Controller.energyUnitChanged();">
+			       onchange="controller.setEnergy(); this.oldValue = this.value;">
+			<select id="energyunit" onchange="controller.energyUnitChanged();">
 			    <option value="keV"> keV </option> 
 				<option value="eV"> eV </option>
 			</select>
@@ -109,8 +109,8 @@
 		<div>
 			<label> Wavelength: </label>
 			<input class="field" id="wavelength" type="text" onfocus="this.oldValue = this.value;" 
-			       onchange="Controller.setWavelength(); this.oldValue = this.value;">
-			<select id="wavelengthunit" onchange="Controller.wavelengthUnitChanged();">
+			       onchange="controller.setWavelength(); this.oldValue = this.value;">
+			<select id="wavelengthunit" onchange="controller.wavelengthUnitChanged();">
 			    <option value="nm"> nm </option> 
 				<option value="angstrom"> &#8491; </option>
 			</select>
@@ -121,10 +121,10 @@
 	<div class="configurationPanelSection" id="anglePanel">
 		<div>
 			<label> Angle: </label>
-			<input class="field" id="angle" type="text" value ="90" onfocus="this.oldValue = this.value;"
-			       onchange="Controller.setAngle(); this.oldValue = this.value;">
-			<select id="angleunit" onchange="Controller.angleUnitChanged();">
-			    <option value="deg" selected="selected"> &deg; </option> 
+			<input class="field" id="angle" type="text" onfocus="this.oldValue = this.value;"
+			       onchange="controller.setAngle(); this.oldValue = this.value;">
+			<select id="angleunit" onchange="controller.angleUnitChanged();">
+			    <option value="deg"> &deg; </option> 
 				<option value="rad"> rad </option>
 			</select>
 		</div>
@@ -135,7 +135,7 @@
 		<div>
 			<label> Camera length: </label>
 			<input class="field" id="cameraLength" type="number" min="1.2" max="9.7" step="0.25"
-			       onchange="Controller.setCameraLength();">  
+			       onchange="controller.setCameraLength();">  
 			<span class="units"> (m) </span>
 		</div>
 	</div>
@@ -156,7 +156,7 @@ scatteringQuantities.controller("scatteringQuantitiesController", function($scop
 	$scope.SQ = scattering.getScatteringQuantities()[0];
 	$scope.SQUnit = scattering.getUnitsFor($scope.SQ)[0].unit;
 	$scope.scatteringQuantityUnitChanged = function(){
-		Controller.displayRanges($scope.SQ, $scope.SQUnit);
+		controller.displayRanges($scope.SQ, $scope.SQUnit); // Delegate to the main controller for this page.
 	}
 });
 </script>
@@ -166,7 +166,7 @@ scatteringQuantities.controller("scatteringQuantitiesController", function($scop
 		<div>
 			<label> Scattering Quantity: </label>
 			<select id="scatteringQuantity" data-ng-model="SQ" 
-			        data-ng-change="SQUnit=scattering.getUnitsFor(SQ)[0].unit; scatteringQuantityUnitChanged();">
+			        data-ng-change="SQUnit = scattering.getUnitsFor(SQ)[0].unit; scatteringQuantityUnitChanged();">
 				<option data-ng-repeat="sq in scattering.getScatteringQuantities()">{{sq}}</option>
 			</select>
 			<select id="scatteringQuantityUnit" data-ng-model="SQUnit" data-ng-change="scatteringQuantityUnitChanged();">
@@ -185,12 +185,12 @@ scatteringQuantities.controller("scatteringQuantitiesController", function($scop
 		<div>
 			<label> Requested {{SQ}} min: </label>
 			<input class="field" id="requestedMin" type="text" onfocus="this.oldValue = this.value;"
-			       onchange="Controller.setRequestedMin(); this.oldValue = this.value;">
+			       onchange="controller.setRequestedMin(); this.oldValue = this.value;">
 		</div>
 		<div>
 			<label> Requested {{SQ}} max: </label>
 			<input class="field" id="requestedMax" type="text" onfocus="this.oldValue = this.value;"
-			       onchange="Controller.setRequestedMax(); this.oldValue = this.value;">
+			       onchange="controller.setRequestedMax(); this.oldValue = this.value;">
 		</div>
 	</div>
 	<canvas id="resultsCanvas"></canvas>

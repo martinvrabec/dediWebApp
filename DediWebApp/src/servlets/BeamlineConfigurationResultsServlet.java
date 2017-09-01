@@ -200,11 +200,7 @@ public class BeamlineConfigurationResultsServlet extends HttpServlet {
 		Vector3d visibleQMax = qSpace.qFromPixelPosition(ptMax.x/detector.getXPixelMM(), ptMax.y/detector.getYPixelMM());
 		
 		
-		// Create a deep copy of ptMin and ptMax to pass to the Runnable below,
-		// because the code that follows might modify them,
-		// but we want the UI thread to use their current values.
-		// (It's not enough to create the copy in the call to setVisibleQRange()).
-		// Assume visibleQMin and visibleQMax won't change.
+		
 		Vector2d ptMinCopy = new Vector2d(ptMin);
 		Vector2d ptMaxCopy = new Vector2d(ptMax);
 		results.setVisibleRange(new NumericRange(visibleQMin.length()*1e10, visibleQMax.length()*1e10), ptMinCopy, ptMaxCopy);

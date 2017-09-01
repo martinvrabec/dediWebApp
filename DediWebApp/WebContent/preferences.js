@@ -6,9 +6,9 @@ var preferenceService = {};
 
 (function(context){
 	context.loadPreferences = function() {
-		var detectors;              // The list of available detectors
+		var detectors = [];              // The list of available detectors
 		var defaultDetector = {};
-		var beamlines;             // The list of pre-defined beamline configuration templates.
+		var beamlines = [];             // The list of pre-defined beamline configuration templates.
 
 
 		function getDetectorsFromPreference(callback){

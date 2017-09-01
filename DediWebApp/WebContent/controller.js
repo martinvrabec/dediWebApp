@@ -1,10 +1,18 @@
-var Controller = {};
+var controller = {};
 
 (function(context){
 	var beamline = {};
 	var results = {};
 	
 	$(document).ready(function(){
+		// Populate the UI with default values that are not part of the preferences service
+		$('#angleunit').val("deg");
+		$('#angle').val(90);
+		$('#requestedMin').val(0);
+		$('#requestedMax').val(0);
+		// Note there is no default for energy and wavelength
+		
+		// Load preferences from the preferences service
 		preferenceService.loadPreferences();
 	});
 	
@@ -25,8 +33,8 @@ var Controller = {};
 				results.fullRangeMax = results.fullRange['max'];
 			}
 			context.displayRanges(document.getElementById("scatteringQuantity").value, document.getElementById("scatteringQuantityUnit").value);
-			PlottingSystem.createBeamlinePlot(beamline, document.getElementById("beamlineCanvas"), results);
-			PlottingSystem.createResultsBar(beamline, document.getElementById("resultsCanvas"), results);
+			plottingSystem.createBeamlinePlot(beamline, document.getElementById("beamlineCanvas"), results);
+			plottingSystem.createResultsBar(beamline, document.getElementById("resultsCanvas"), results);
 		});	
 	}
 	
@@ -36,6 +44,10 @@ var Controller = {};
 	 */
 	
 	 context.setBeamlineTemplate = function() {
+		// Save user-entered values that are not part of the template.
+		var energy = beamline.energy;
+		var wavelength = beamline.wavelength;
+		
 		beamline = JSON.parse($('#beamlineTemplatesCombo').find(':selected').val());
 		
 		// Populate the entire UI with the values from the template.
@@ -54,36 +66,36 @@ var Controller = {};
 		$('#cameraLength').attr("min", beamline.minCameraLength); 
 		$('#cameraLength').attr("max", beamline.maxCameraLength); 
 		$('#cameraLength').attr("step", beamline.camereLengthStepSize); 
-		$('#cameraLength').val(beamline.minCameraLength); 
+		
+		// Default values not included in the template
 		beamline.cameraLength = beamline.minCameraLength;
+		$('#cameraLength').val(beamline.cameraLength); 
 		beamline.minEnergy = scattering.convertWavelengthToEnergy(beamline.maxWavelength, "nm", "keV");
 		beamline.maxEnergy = scattering.convertWavelengthToEnergy(beamline.minWavelength, "nm", "keV");
 		beamline.minWavelength = math.unit(beamline.minWavelength, "nm").toNumber("m");
 		beamline.maxWavelength = math.unit(beamline.maxWavelength, "nm").toNumber("m");
 		
-		// Default values not included in the template
+		// Restore user-entered values
+		beamline.energy = energy;
+		beamline.wavelength = wavelength;
 		beamline.angle = math.unit($('#angle').val(), $('#angleunit').val()).toNumber("rad");
- 		$('#requestedMin').val(0);
-		$('#requestedMax').val(0);
-		beamline.requestedMin = 0;
-		beamline.requestedMax = 0;
+		beamline.requestedMin = 
+			scattering.convertBetweenScatteringQuantities($("#scatteringQuantity").val(), $('#requestedMin').val(),
+	                   $("#scatteringQuantityUnit").val(), "q", "m^-1");
+		beamline.requestedMax = 
+			scattering.convertBetweenScatteringQuantities($("#scatteringQuantity").val(), $('#requestedMax').val(),
+                   $("#scatteringQuantityUnit").val(), "q", "m^-1");
  	
 		// Recalculate the results and update the plot.
 		processInput();
 	};
+	
 	
 	context.setDetector = function(){
 		beamline.detector = $('#detectorsCombo').find(':selected').data('info');
 		$('#detectorResolution').html(beamline.detector.numberOfPixelsX + " x " + beamline.detector.numberOfPixelsY);
 	    $('#pixelSize').html(beamline.detector.XPixelMM + " x " + beamline.detector.YPixelMM);
 	    processInput();
-	};
-	
-	
-	context.setBeamstopDiameter = function() {
-		var value = document.getElementById("bsd").value;
-		beamline.beamstopDiameter = math.unit(parseFloat(value), document.getElementById("bsdunit").value).toNumber("mm");
-		processInput();
 	};
 	
 	
@@ -115,13 +127,6 @@ var Controller = {};
 
 	context.setClearance = function() {
 		beamline.clearance = document.getElementById("clearance").value;
-		processInput();
-	};
-
-
-	context.setCameraTubeDiameter = function() {
-		var value = document.getElementById("ctdiameter").value;
-		beamline.cameraTubeDiameter = math.unit(parseFloat(value), document.getElementById("ctdunit").value).toNumber("mm");
 		processInput();
 	};
 
@@ -214,9 +219,9 @@ var Controller = {};
 	context.setRequestedMin = function(){
 		var element = document.getElementById("requestedMin");
 		var value = element.value;
-		if(isNaN(value)){
+		if(isNaN(value) || value < 0){
 			element.value = element.oldValue;
-			alert("Requested minimum must be a number.");
+			alert("Requested minimum must be a non-negative number.");
 			return;
 		}
 		beamline.requestedMin = 
@@ -230,9 +235,9 @@ var Controller = {};
 	context.setRequestedMax = function(){
 		var element = document.getElementById("requestedMax");
 		var value = element.value;
-		if(isNaN(value)){
+		if(isNaN(value) || value < 0){
 			element.value = element.oldValue;
-			alert("Requested maximum must be a number.");
+			alert("Requested maximum must be a non-negative number.");
 			return;
 		}
 		beamline.requestedMax = 
@@ -260,6 +265,9 @@ var Controller = {};
 		    var convertedMaxVisible = scattering.convertBetweenScatteringQuantities("q", maxVisible, "m^-1", quantity, unit);
 		    document.getElementById("visibleMin").innerHTML = Math.min(convertedMinVisible, convertedMaxVisible).toFixed(3);
 		    document.getElementById("visibleMax").innerHTML =  Math.max(convertedMinVisible, convertedMaxVisible).toFixed(3);
+		} else {
+			 document.getElementById("visibleMin").innerHTML = "";
+			 document.getElementById("visibleMax").innerHTML = "";
 		}
 				
 		var minRequested = beamline.requestedMin;
@@ -274,7 +282,7 @@ var Controller = {};
 	
 	
 	/*
-	 * Functions for processing unit and quantity changes.
+	 * Functions for processing unit changes.
 	 */
 	
 	context.bsDiameterUnitChanged = function(){
@@ -312,4 +320,4 @@ var Controller = {};
 		}
 	};
 	
-})(Controller);
+})(controller);

@@ -1,9 +1,10 @@
 /**
- * Module for plotting the beamline configuration.
- * To (re)draw the plot, invoke the public method updatePlot() on the PlottingSystem object.
+ * Module for plotting the beamline configuration and the results of q-range computations.
+ * To (re)draw the plot, invoke the public method createBeamlinePlot on the plottingSystem object.
+ * To (re)draw the results bar, invoke the public method createResultsBar on the plottingSystem object.
  */
 
-var PlottingSystem = {};
+var plottingSystem = {};
 
 (function(context){
 	/*
@@ -108,12 +109,15 @@ var PlottingSystem = {};
 		else 
 			ctx.fillStyle = "green"
 				
-	   var offset = canvas.width/1000;
+	   var offset = canvas.width/100;
 	   var slope = (canvas.width-2*offset)/ (Math.log(results.fullRangeMax) - Math.log(results.fullRangeMin));
        var minRequestedX = slope*(Math.log(beamline.requestedMin) - Math.log(results.fullRangeMin)) + offset;
-       var maxRequestedX = slope*(Math.log(beamline.requestedMax) - Math.log(results.fullRangeMin)) - offset;
+       var maxRequestedX = slope*(Math.log(beamline.requestedMax) - Math.log(results.fullRangeMin)) + offset;
        var minValueX = slope*(Math.log(results.visibleMin) - Math.log(results.fullRangeMin)) + offset;
-	   var maxValueX = slope*(Math.log(results.visibleMax) - Math.log(results.fullRangeMin)) - offset;
+	   var maxValueX = slope*(Math.log(results.visibleMax) - Math.log(results.fullRangeMin)) + offset;
+	   
+	   if(maxRequestedX > canvas.width - offset) maxRequestedX = canvas.width - offset;
+	   if(minRequestedX > canvas.width - offset) minRequestedX = canvas.width - offset;
 	   
 	   ctx.fillRect(minValueX, canvas.height/3, maxValueX - minValueX, canvas.height/3);
 	   ctx.lineWidth = 2;
@@ -129,7 +133,10 @@ var PlottingSystem = {};
 		beamline = bl;
 		results = res;
 		canvas = cvs
-		if(beamline === undefined || beamline.detector === undefined) return;
+		if(beamline === undefined || beamline.detector === undefined){
+			clearPlot("black");
+			return;
+		}
 		var maxSide = Math.max(beamline.detector.numberOfPixelsX, beamline.detector.numberOfPixelsY);
 		scaleFactor = 800/maxSide;
 		canvas.width = beamline.detector.numberOfPixelsX*scaleFactor;
@@ -139,7 +146,7 @@ var PlottingSystem = {};
 		drawDetector();
 		drawCameraTube();
 		drawBeamstop();
-		drawRay();
+		if(results.visibleRangeStartPoint !== undefined || results.visibleRangeEndPoint !== undefined) drawRay();
 	};
 	
 	
@@ -152,4 +159,4 @@ var PlottingSystem = {};
 		drawResultsBar();
 	};
 	
-})(PlottingSystem);
+})(plottingSystem);
