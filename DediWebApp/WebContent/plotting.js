@@ -15,6 +15,8 @@ var plottingSystem = {};
 	var canvas = {};
 	var ctx = {};
 	var scaleFactor = 1;
+	var offsetX = 0;
+	var offsetY = 0;
 	
 	
 	/*
@@ -26,12 +28,21 @@ var plottingSystem = {};
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 	}
 	
+	
 	function drawLine(x1, y1, x2, y2, colour){
 		ctx.beginPath();
 		ctx.moveTo(x1, y1);
 		ctx.lineTo(x2, y2);
 		ctx.strokeStyle = colour;
 		ctx.stroke();
+	}
+	
+	
+	function drawEllipse(major, minor, x, y, colour){
+		ctx.beginPath();
+		ctx.ellipse(x, y, major, minor, 0, 0, 2 * Math.PI);
+		ctx.fillStyle = colour;
+		ctx.fill();
 	}
 	
 	
@@ -67,7 +78,7 @@ var plottingSystem = {};
 		var diameterPixels = beamline.cameraTubeDiameter/2/beamline.detector.XPixelMM;
 		var diameter = scaleFactor*diameterPixels;
 		
-		drawCircle(diameter, x, y, "beige");
+		drawCircle(diameter, x, y, "rgba(245, 245, 220, 0.7)");
 	}
 	
 	
@@ -100,12 +111,8 @@ var plottingSystem = {};
 	
 	
 	function drawAxes(){
-		if(beamline.wavelength === undefined || beamline.cameraLength === undefined){
-			$('#axes').hide();
+		if(beamline.wavelength === undefined || beamline.cameraLength === undefined)
 			return;
-		}
-		
-		$('#axes').show();
 		
 		ctx.fillStyle = "black";
 		ctx.font = "14px Arial";
@@ -113,33 +120,35 @@ var plottingSystem = {};
 		var x0 = beamline.beamstopXCentre*scaleFactor;
 		var y0 = beamline.beamstopYCentre*scaleFactor;
 		
-		var dx = scaleFactor*beamline.wavelength*beamline.cameraLength*1e12/(2*Math.PI)/beamline.detector.XPixelMM;
-		var dy = dx;
+		var step = beamline.wavelength*beamline.cameraLength*1e12/(2*Math.PI);
+		var dx = scaleFactor*step/beamline.detector.XPixelMM;
+		var dy = scaleFactor*step/beamline.detector.YPixelMM;
+		var width = canvas.width - offsetX;
+		var height = canvas.height - offsetY;
 		
-		var i = 0;
-		while(x0 + i*dx < canvas.width){
-			drawLine(x0 + i*dx, canvas.height, x0 + i*dx, canvas.height - 10, "black");
-			ctx.fillText(i, x0 + i*dx, canvas.height-15); 
+		var i = Math.ceil((-offsetX - x0)/dx);
+		var colour;
+		while(x0 + i*dx < width){
+			if(i == 0) colour = "black";
+			else colour = "#e9e9e9";
+			drawLine(x0 + i*dx, height, x0 + i*dx, -offsetY, colour);
+			if(i != 0){
+				drawLine(x0 + i*dx, y0 - 10, x0 + i*dx, y0 + 10, "black");
+				ctx.fillText(i, x0 + i*dx, y0 -15); 
+			}
 			i++;
 		}
-		i = -1;
-		while(x0 + i*dx > 0){
-			drawLine(x0 + i*dx, canvas.height, x0 + i*dx, canvas.height - 10, "black");
-			ctx.fillText(i, x0 + i*dx, canvas.height-15); 
-			i--;
-		}
 		
-		var i = 0;
-		while(y0 + i*dy < canvas.height){
-			drawLine(0, y0 + i*dy, 10, y0 + i*dy, "black");
-			ctx.fillText(i, 15, y0 + i*dy); 
+		i = Math.ceil((-offsetY - y0)/dy);
+		while(y0 + i*dy < canvas.height - offsetY){
+			if(i == 0) colour = "black";
+			else colour = "#e9e9e9";
+			drawLine(-offsetX, y0 + i*dy, width, y0 + i*dy, colour);
+			if(i != 0){
+				drawLine(x0 - 10, y0 + i*dy, x0 + 10, y0 + i*dy, "black");
+				ctx.fillText(i, x0 + 15, y0 + i*dy); 
+			}
 			i++;
-		}
-		i = -1;
-		while(y0 + i*dy > 0){
-			drawLine(0, y0 + i*dy, 10, y0 + i*dy, "black");
-			ctx.fillText(i, 15, y0 + i*dy);
-			i--;
 		}
 	}
 	
@@ -176,10 +185,13 @@ var plottingSystem = {};
 	 * Public methods.
 	 */
 	
-	context.createBeamlinePlot = function(bl, cvs, res){
+	context.createBeamlinePlot = function(bl, cvs, res, axesPlotted = false, maskPlotted = false, 
+			                              zoom = 1, offX = offsetX, offY = offsetY){
 		beamline = bl;
 		results = res;
-		canvas = cvs
+		canvas = cvs;
+		offsetX = offX;
+		offsetY = offY;
 		if(beamline === undefined || beamline.detector === undefined){
 			clearPlot("black");
 			return;
@@ -188,13 +200,15 @@ var plottingSystem = {};
 		scaleFactor = 800/maxSide;
 		canvas.width = beamline.detector.numberOfPixelsX*scaleFactor;
 		canvas.height = beamline.detector.numberOfPixelsY*scaleFactor;
+		scaleFactor *= zoom;
 		ctx = canvas.getContext("2d");
 		clearPlot("grey");
+		ctx.translate(offsetX, offsetY);
 		drawDetector();
 		drawCameraTube();
+		if(axesPlotted) drawAxes();
 		drawBeamstop();
 		drawRay();
-		drawAxes();
 	};
 	
 	

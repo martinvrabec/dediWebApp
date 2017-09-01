@@ -4,16 +4,40 @@ var controller = {};
 	var beamline = {};
 	var results = {};
 	
+	
 	$(document).ready(function(){
 		// Populate the UI with default values that are not part of the preferences service
 		$('#angleunit').val("deg");
 		$('#angle').val(90);
 		$('#requestedMin').val(0);
 		$('#requestedMax').val(0);
-		// Note there is no default for energy and wavelength
+		// Note there is no default for energy and wavelength, the fields are left blank by default
+		
 		
 		// Load preferences from the preferences service
 		preferenceService.loadPreferences();
+		
+		
+		// Register some event handlers
+		$('input[name="mask"]').click(function() {
+			redrawConfigurationPlot();
+		});
+		
+		$('input[name="axes"]').click(function() {
+			redrawConfigurationPlot();
+		});
+		
+		$('input[name="zoom"]').click(function() {
+			redrawConfigurationPlot();
+		});
+		
+		$('input[type="number"]').keydown(function() {
+			return false;
+		});
+		
+		
+		
+		$('input[name="axes"]').prop('disabled', true);
 	});
 	
 	
@@ -33,9 +57,19 @@ var controller = {};
 				results.fullRangeMax = results.fullRange['max'];
 			}
 			context.displayRanges(document.getElementById("scatteringQuantity").value, document.getElementById("scatteringQuantityUnit").value);
-			plottingSystem.createBeamlinePlot(beamline, document.getElementById("beamlineCanvas"), results);
+			redrawConfigurationPlot();
 			plottingSystem.createResultsBar(beamline, document.getElementById("resultsCanvas"), results);
 		});	
+		
+		if(beamline.wavelength === undefined) $('input[name="axes"]').prop('disabled', true);
+		else $('input[name="axes"]').prop('disabled', false);
+	}
+	
+	
+	function redrawConfigurationPlot(){
+		plottingSystem.createBeamlinePlot(beamline, $("#beamlineCanvas")[0], results, 
+				$('input[name="axes"]').is(':checked'), $('input[name="mask"]').is(':checked'), 
+				$('input[name="zoom"]').val()/100);
 	}
 	
 	
