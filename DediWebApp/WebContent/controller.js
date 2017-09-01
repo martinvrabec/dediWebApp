@@ -21,21 +21,15 @@ var controller = {};
 		
 		
 		// Register some event handlers
-		$('input[name="mask"]').click(function() {
+		$("#plotConfigurationPanel input").on("click change", function() {
 			redrawConfigurationPlot();
 		});
 		
-		$('input[name="axes"]').click(function() {
-			redrawConfigurationPlot();
-		});
-		
-		$('input[name="zoom"]').change(function() {
-			redrawConfigurationPlot();
-		});
 		
 		$('input[type="number"]').keydown(function() {
 			return false;
 		});
+		
 		
 		var canvasX = 0;
 		var canvasY = 0;
@@ -47,22 +41,26 @@ var controller = {};
 			canvasY = event.pageY;
 		}, false);
 		
+		
 		$canvas.addEventListener("mouseup", function(event){
 			offsetX += event.pageX - canvasX;
 			offsetY += event.pageY - canvasY;
 			redrawConfigurationPlot();
 		}, false);
 		
+		
 		$canvas.addEventListener('mousewheel', function(event) {
 			event.preventDefault();
-			$('input[name="zoom"]').val(parseFloat($('input[name="zoom"]').val()) + 10*Math.sign(event.wheelDelta)).change();
+			$('input[name="zoom"]').val(Math.max(10, parseFloat($('input[name="zoom"]').val()) + 10*Math.sign(event.wheelDelta))).change();
 		}, false);
+		
 		
 		$canvas.addEventListener('DOMMouseScroll', function(event) {
 			event.preventDefault();
-			$('input[name="zoom"]').val(parseFloat($('input[name="zoom"]').val()) - 10*Math.sign(event.detail)).change();
+			$('input[name="zoom"]').val(Math.max(10, parseFloat($('input[name="zoom"]').val()) - 10*Math.sign(event.detail))).change();
 		}, false);
 	
+		
 		$('input[name="axes"]').prop('disabled', true);
 	});
 	
@@ -82,7 +80,7 @@ var controller = {};
 				results.fullRangeMin =  results.fullRange['min'];
 				results.fullRangeMax = results.fullRange['max'];
 			}
-			context.displayRanges(document.getElementById("scatteringQuantity").value, document.getElementById("scatteringQuantityUnit").value);
+			context.displayRanges($("#scatteringQuantity").val(), $("#scatteringQuantityUnit").val());
 			redrawConfigurationPlot();
 			plottingSystem.createResultsBar(beamline, document.getElementById("resultsCanvas"), results);
 		});	
