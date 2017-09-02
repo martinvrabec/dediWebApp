@@ -3,9 +3,14 @@ var controller = {};
 (function(context){
 	var beamline = {};
 	var results = {};
+	var plottingSystem = {};
 	
-	var offsetX = 0;
-	var offsetY = 0;
+	
+	$("#beamlineCanvas").ready(function(){
+		// Create the plotting system for the beamline configuration plot
+		plottingSystem = plottingService.createBeamlinePlottingSystem($("#beamlineCanvas"));
+	})
+	
 	
 	$(document).ready(function(){
 		// Populate the UI with default values that are not part of the preferences service
@@ -20,48 +25,10 @@ var controller = {};
 		preferenceService.loadPreferences();
 		
 		
-		// Register some event handlers
-		$("#plotConfigurationPanel input").on("click change", function() {
-			redrawConfigurationPlot();
-		});
-		
-		
+		// Prevent users from typing into spinner widgets
 		$('input[type="number"]').keydown(function() {
 			return false;
 		});
-		
-		
-		var canvasX = 0;
-		var canvasY = 0;
-		
-		var $canvas = $("#beamlineCanvas")[0];
-		
-		$canvas.addEventListener("mousedown", function(event){
-			canvasX = event.pageX;
-			canvasY = event.pageY;
-		}, false);
-		
-		
-		$canvas.addEventListener("mouseup", function(event){
-			offsetX += event.pageX - canvasX;
-			offsetY += event.pageY - canvasY;
-			redrawConfigurationPlot();
-		}, false);
-		
-		
-		$canvas.addEventListener('mousewheel', function(event) {
-			event.preventDefault();
-			$('input[name="zoom"]').val(Math.max(10, parseFloat($('input[name="zoom"]').val()) + 10*Math.sign(event.wheelDelta))).change();
-		}, false);
-		
-		
-		$canvas.addEventListener('DOMMouseScroll', function(event) {
-			event.preventDefault();
-			$('input[name="zoom"]').val(Math.max(10, parseFloat($('input[name="zoom"]').val()) - 10*Math.sign(event.detail))).change();
-		}, false);
-	
-		
-		$('input[name="axes"]').prop('disabled', true);
 	});
 	
 	
@@ -81,20 +48,11 @@ var controller = {};
 				results.fullRangeMax = results.fullRange['max'];
 			}
 			context.displayRanges($("#scatteringQuantity").val(), $("#scatteringQuantityUnit").val());
-			redrawConfigurationPlot();
-			plottingSystem.createResultsBar(beamline, document.getElementById("resultsCanvas"), results);
+			plottingSystem.updatePlot(beamline, results);
+			plottingService.createResultsBar(beamline, $("#resultsCanvas")[0], results);
 		});	
-		
-		if(beamline.wavelength === undefined) $('input[name="axes"]').prop('disabled', true);
-		else $('input[name="axes"]').prop('disabled', false);
 	}
 	
-	
-	function redrawConfigurationPlot(){
-		plottingSystem.createBeamlinePlot(beamline, $("#beamlineCanvas")[0], results, 
-				$('input[name="axes"]').is(':checked'), $('input[name="mask"]').is(':checked'), 
-				$('input[name="zoom"]').val()/100, offsetX, offsetY);
-	}
 	
 	
 	/*

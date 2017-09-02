@@ -4,12 +4,12 @@
  * To (re)draw the results bar, invoke the public method createResultsBar on the plottingSystem object.
  */
 
-var plottingSystem = {};
+var plottingService = {};
 
-(function(context){
+(function(module){
 	
 	/*
-	 * Private utility methods.
+	 * General private utility methods.
 	 */
 	
 	function clearPlot(colour, ctx, canvas){
@@ -43,8 +43,7 @@ var plottingSystem = {};
 	}
 	
 	
-	
-	context.createBeamlinePlot = (function(){
+	module.createBeamlinePlottingSystem = (function(){
 		/*
 		 * Private fields.
 		 */
@@ -170,6 +169,9 @@ var plottingSystem = {};
 				clearPlot("black", ctx, canvas);
 				return;
 			}
+			axesPlotted = $('input[name="axes"]').is(':checked');
+			maskPlotted = $('input[name="mask"]').is(':checked');
+			zoom = $('input[name="zoom"]').val()/100;
 			var maxSide = Math.max(beamline.detector.numberOfPixelsX, beamline.detector.numberOfPixelsY);
 			scaleFactor = 800/maxSide;
 			canvas.width = beamline.detector.numberOfPixelsX*scaleFactor;
@@ -186,25 +188,75 @@ var plottingSystem = {};
 		}
 		
 		
+		function createPlotControls(cvs){
+			cvs.after('<div class="textPanel" id="plotConfigurationPanel">' + 
+				    '<label> Zoom: </label> <input name="zoom" type="number" min="10" step="10" value="100"><br/>' +
+				    '<input type="checkbox" name="axes"> Show axes (in q [1/nm]) <br/>' +
+				    '<input type="checkbox" name="mask"> Plot detector mask' +
+				    '</div>');
+		}
+		
+		
+		function registerEventHandlers(){
+			$("#plotConfigurationPanel input").on("click change", function() {
+				redrawPlot();
+			});
+			
+			var canvasX = 0;
+			var canvasY = 0;
+			
+			canvas.addEventListener("mousedown", function(event){
+				canvasX = event.pageX;
+				canvasY = event.pageY;
+			}, false);
+			
+			
+			canvas.addEventListener("mouseup", function(event){
+				offsetX += event.pageX - canvasX;
+				offsetY += event.pageY - canvasY;
+				redrawPlot();
+			}, false);
+			
+			
+			canvas.addEventListener('mousewheel', function(event) {
+				event.preventDefault();
+				$('input[name="zoom"]').val(Math.max(10, parseFloat($('input[name="zoom"]').val()) + 10*Math.sign(event.wheelDelta))).change();
+			}, false);
+			
+			
+			canvas.addEventListener('DOMMouseScroll', function(event) {
+				event.preventDefault();
+				$('input[name="zoom"]').val(Math.max(10, parseFloat($('input[name="zoom"]').val()) - 10*Math.sign(event.detail))).change();
+			}, false);
+			
+			
+			$('input[name="axes"]').prop('disabled', true);
+		}
+		
 		/*
 		 * Returned public function.
 		 */
-		return function(bl, cvs, res, ap = false, mp = false, 
-                        zm = zoom, offX = offsetX, offY = offsetY){
-			beamline = bl;
-			results = res;
-			canvas = cvs;
-			offsetX = offX;
-			offsetY = offY;
-			zoom = zm;
-			axesPlotted = ap;
-			maskPlotted = mp;
-			redrawPlot();
-		};
+		return function(cvs){
+			canvas = cvs[0];
+			
+			createPlotControls(cvs); 
+			registerEventHandlers();
+			
+			var system = {updatePlot : function(bl, res){
+					beamline = bl;
+					results = res;
+					if(beamline.wavelength === undefined) $('input[name="axes"]').prop('disabled', true);
+					else $('input[name="axes"]').prop('disabled', false);
+					redrawPlot();
+				}
+			};
+			
+			return system;
+		}
 	})();
 	
 	
-	context.createResultsBar = (function() {
+	module.createResultsBar = (function() {
 		/*
 		 * Private fields.
 		 */
@@ -259,4 +311,4 @@ var plottingSystem = {};
 		};
 	})();
 	
-})(plottingSystem);
+})(plottingService);
