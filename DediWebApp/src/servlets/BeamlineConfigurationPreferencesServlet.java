@@ -73,9 +73,9 @@ public class BeamlineConfigurationPreferencesServlet extends HttpServlet {
         try {
             File f = new File("beamlinePreferences.txt");
             if (!f.exists()) {
+            	configurations = getDefaultBeamlines();
                 f.createNewFile();
                 writer = new PrintWriter(new FileWriter(f));
-                configurations = getDefaultBeamlines();
         		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         		XMLEncoder xmlEncoder = new XMLEncoder(baos);
         		xmlEncoder.writeObject(configurations);

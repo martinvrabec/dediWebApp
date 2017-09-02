@@ -44,6 +44,18 @@ select {
 }
 
 
+:disabled {
+    background-color: #aaa;
+    color: grey;
+    border: 1px solid grey;
+}
+
+
+:disabled:hover {
+    cursor: not-allowed;
+}
+
+
 #resultsPanel {
 	height : 30%;
 	width : 45%;
@@ -83,6 +95,10 @@ select {
 	display : inline;
 }
 
+
+#beamlineCanvas:hover {
+	cursor : grab;
+}
 
 
 

@@ -11,6 +11,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.measure.unit.SI;
@@ -57,9 +58,10 @@ public class DetectorPreferencesServlet extends HttpServlet {
 	
 	
 	/**
-	 * If a detectorPreferences.txt file does not yet exist, this method populates it with a default list
-	 * of detectors in XML format. If it exists, it tries to parse the XML to get the list of detectors.
-	 * If it fails to parse the XML, then it uses the default detectors (however it does not overwrite the 
+	 * If a detectorPreferences.txt file does not exist, it uses the default detectors and tries create 
+	 * that file and populate it with an XML representation of the default detectors. 
+	 * If it exists, it tries to parse the XML to get the list of detectors.
+	 * If it fails to parse the XML, it uses the default detectors (however it does not overwrite the 
 	 * broken file).
 	 */
 	@SuppressWarnings("unchecked")
@@ -72,9 +74,9 @@ public class DetectorPreferencesServlet extends HttpServlet {
         try {
             File f = new File("detectorPreferences.txt");
             if (!f.exists()) {
+            	detectors = getDefaultDetectors();
                 f.createNewFile();
                 writer = new PrintWriter(new FileWriter(f));
-                detectors = getDefaultDetectors();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
         		XMLEncoder xmlEncoder = new XMLEncoder(baos);
         		xmlEncoder.writeObject(detectors);
@@ -122,18 +124,35 @@ public class DetectorPreferencesServlet extends HttpServlet {
 		List<DiffractionDetector> detectors = new ArrayList<>();
 		
 		// Pilatus 2M
-		DiffractionDetector dd = new DiffractionDetector();
-		dd.setDetectorName("Pilatus2m");
-		dd.setxPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
-		dd.setyPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
-		dd.setNumberOfPixelsX(1475);
-		dd.setNumberOfPixelsY(1679);
-		dd.setNumberOfHorizontalModules(3);
-		dd.setNumberOfVerticalModules(8);
-		dd.setXGap(7);
-		dd.setYGap(17);
-		detectors.add(dd);
+		DiffractionDetector dd0 = new DiffractionDetector();
+		dd0.setDetectorName("Pilatus P3-2M");
+		dd0.setxPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
+		dd0.setyPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
+		dd0.setNumberOfPixelsX(1475);
+		dd0.setNumberOfPixelsY(1679);
+		dd0.setNumberOfHorizontalModules(3);
+		dd0.setNumberOfVerticalModules(8);
+		dd0.setXGap(7);
+		dd0.setYGap(17);
+		dd0.setMissingModules(new ArrayList<>());
+		detectors.add(dd0);
 
+		
+		// Pilatus 2M for WAXS - Pilatus 2M with 3 modules missing
+		DiffractionDetector dd1 = new DiffractionDetector();
+		dd1.setDetectorName("Pilatus P3-2M-DLS-L (for WAXS)");
+		dd1.setxPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
+		dd1.setyPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
+		dd1.setNumberOfPixelsX(1475);
+		dd1.setNumberOfPixelsY(1679);
+		dd1.setNumberOfHorizontalModules(3);
+		dd1.setNumberOfVerticalModules(8);
+		dd1.setXGap(7);
+		dd1.setYGap(17);
+		List<Integer> missingModules = new ArrayList<>();
+		missingModules.addAll(Arrays.asList(17, 20, 23));
+		dd1.setMissingModules(missingModules);
+		detectors.add(dd1);
 		
 		// Pilatus 6M
 		DiffractionDetector dd2 = new DiffractionDetector();

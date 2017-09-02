@@ -121,6 +121,44 @@ var plottingService = {};
 		}
 		
 		
+		function drawMask(){
+			var missingModules = beamline.detector.missingModules;
+			var xGap = beamline.detector.XGap*scaleFactor;
+			var yGap = beamline.detector.YGap*scaleFactor;
+			var numberOfHorizontalModules = beamline.detector.numberOfHorizontalModules;
+			var numberOfVerticalModules = beamline.detector.numberOfVerticalModules;
+			
+			if(!xGap || !yGap || !numberOfHorizontalModules || !numberOfVerticalModules) return;
+			
+			var detectorWidth = beamline.detector.numberOfPixelsX*scaleFactor;
+			var detectorHeight = beamline.detector.numberOfPixelsY*scaleFactor;
+            var moduleWidth = (detectorWidth - (numberOfHorizontalModules-1)*xGap)/
+							   numberOfHorizontalModules;
+            var moduleHeight = (detectorHeight - (numberOfVerticalModules-1)*yGap)/
+			                    numberOfVerticalModules;
+            var i;
+            var j;
+            ctx.lineWidth = xGap;
+            for(i = moduleWidth, j = 1; j < numberOfHorizontalModules; i += moduleWidth + xGap, j++)
+            	drawLine(i, 0, i, detectorHeight, "violet", ctx);
+            
+            ctx.lineWidth = yGap;
+            for(i = moduleHeight, j = 1; j < numberOfVerticalModules; i += moduleHeight + yGap, j++)
+            	drawLine(0, i, detectorWidth, i, "violet", ctx);
+            
+            if(!missingModules) return;
+            for(i in missingModules){
+            	var index = missingModules[i];
+            	var xIndex = index % numberOfHorizontalModules;
+            	var yIndex = Math.floor(index/numberOfHorizontalModules); 
+            	var x = xIndex*(moduleWidth + xGap) - xGap;
+            	var y = yIndex*(moduleHeight + yGap) - yGap;
+            	ctx.fillStyle = "violet";
+        		ctx.fillRect(x, y, moduleWidth + xGap, moduleHeight + yGap);
+            }
+		}
+		
+		
 		function drawAxes(){
 			if(beamline.wavelength === undefined || beamline.cameraLength === undefined)
 				return;
@@ -131,12 +169,17 @@ var plottingService = {};
 			var x0 = beamline.beamstopXCentre*scaleFactor;
 			var y0 = beamline.beamstopYCentre*scaleFactor;
 			
-			var step = beamline.wavelength*beamline.cameraLength*1e12/(2*Math.PI);
-			var dx = scaleFactor*step/beamline.detector.XPixelMM;
-			var dy = scaleFactor*step/beamline.detector.YPixelMM;
+			//var step = beamline.wavelength*beamline.cameraLength*1e12/(2*Math.PI);
+			var dx = canvas.width/10;
+			var dy = canvas.height/10;
+			var stepx = dx*beamline.detector.XPixelMM*(2*Math.PI)/(scaleFactor*beamline.wavelength*beamline.cameraLength*1e12)
+			var stepy = dy*beamline.detector.YPixelMM*(2*Math.PI)/(scaleFactor*beamline.wavelength*beamline.cameraLength*1e12)
+			/*var dx = scaleFactor*step/beamline.detector.XPixelMM;
+			var dy = scaleFactor*step/beamline.detector.YPixelMM;*/
 			var width = canvas.width - offsetX;
 			var height = canvas.height - offsetY;
 			
+			ctx.lineWidth = 1;
 			var i = Math.ceil((-offsetX - x0)/dx);
 			var colour;
 			while(x0 + i*dx < width){
@@ -145,7 +188,7 @@ var plottingService = {};
 				drawLine(x0 + i*dx, height, x0 + i*dx, -offsetY, colour, ctx);
 				if(i != 0){
 					drawLine(x0 + i*dx, y0 - 10, x0 + i*dx, y0 + 10, "black", ctx);
-					ctx.fillText(i, x0 + i*dx, y0 -15); 
+					ctx.fillText((i*stepx).toFixed(2), x0 + i*dx, y0 -15); 
 				}
 				i++;
 			}
@@ -157,7 +200,7 @@ var plottingService = {};
 				drawLine(-offsetX, y0 + i*dy, width, y0 + i*dy, colour, ctx);
 				if(i != 0){
 					drawLine(x0 - 10, y0 + i*dy, x0 + 10, y0 + i*dy, "black", ctx);
-					ctx.fillText(i, x0 + 15, y0 + i*dy); 
+					ctx.fillText((i*stepy).toFixed(2), x0 + 15, y0 + i*dy); 
 				}
 				i++;
 			}
@@ -182,6 +225,7 @@ var plottingService = {};
 			ctx.translate(offsetX, offsetY);
 			drawDetector();
 			drawCameraTube();
+			if(maskPlotted) drawMask();
 			if(axesPlotted) drawAxes();
 			drawBeamstop();
 			drawRay();
@@ -234,7 +278,7 @@ var plottingService = {};
 		}
 		
 		/*
-		 * Returned public function.
+		 * Returned public function createBeamlinePlottingSystem.
 		 */
 		return function(cvs){
 			canvas = cvs[0];
@@ -242,13 +286,14 @@ var plottingService = {};
 			createPlotControls(cvs); 
 			registerEventHandlers();
 			
-			var system = {updatePlot : function(bl, res){
-					beamline = bl;
-					results = res;
-					if(beamline.wavelength === undefined) $('input[name="axes"]').prop('disabled', true);
-					else $('input[name="axes"]').prop('disabled', false);
-					redrawPlot();
-				}
+			var system = {
+					updatePlot : function(bl, res){
+						beamline = bl;
+						results = res;
+						if(beamline.wavelength === undefined) $('input[name="axes"]').prop('disabled', true);
+						else $('input[name="axes"]').prop('disabled', false);
+						redrawPlot();
+					}
 			};
 			
 			return system;
@@ -293,13 +338,13 @@ var plottingService = {};
 		   
 		   ctx.fillRect(minValueX, canvas.height/3, maxValueX - minValueX, canvas.height/3);
 		   ctx.lineWidth = 2;
-		   drawLine(minRequestedX, 5, minRequestedX, canvas.height, "black", ctx);
-		   drawLine(maxRequestedX, 5, maxRequestedX, canvas.height, "black", ctx);
+		   drawLine(minRequestedX, canvas.height/4, minRequestedX, 3*canvas.height/4, "black", ctx);
+		   drawLine(maxRequestedX, canvas.height/4, maxRequestedX, 3*canvas.height/4, "black", ctx);
 		}
 		
 		
 		/*
-		 * Returned public function.
+		 * Returned public function createResultsBar.
 		 */
 		return function(bl, cvs, res){
 			beamline = bl;
