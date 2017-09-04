@@ -271,16 +271,21 @@ var plottingService = {};
 			}, false);
 			
 			
-			canvas.addEventListener('mousewheel', function(event) {
-				event.preventDefault();
-				$('input[name="zoom"]').val(Math.max(10, parseFloat($('input[name="zoom"]').val()) + 10*Math.sign(event.wheelDelta))).change();
-			}, false);
+			canvas.addEventListener('mousewheel', updateZoom, false);
 			
 			
-			canvas.addEventListener('DOMMouseScroll', function(event) {
+			canvas.addEventListener('DOMMouseScroll', updateZoom, false);
+			
+			
+			function updateZoom(event){
 				event.preventDefault();
-				$('input[name="zoom"]').val(Math.max(10, parseFloat($('input[name="zoom"]').val()) - 10*Math.sign(event.detail))).change();
-			}, false);
+				var oldZoom = $('input[name="zoom"]').val();
+				var newZoom = Math.max(10, parseFloat(oldZoom) - 10*Math.sign(event.detail));
+				offsetX += (event.offsetX - offsetX)*(1-newZoom/oldZoom);
+				offsetY += (event.offsetY - offsetY)*(1-newZoom/oldZoom);
+				$('input[name="zoom"]').val(newZoom);
+				redrawPlot();
+			}
 			
 			
 			$('input[name="axes"]').prop('disabled', true);
