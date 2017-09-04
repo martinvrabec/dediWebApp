@@ -77,8 +77,13 @@ var plottingService = {};
 			var minor = scaleFactor*minorPixels;
 			var minorWithClearance = scaleFactor*(parseFloat(minorPixels) + parseInt(beamline.clearance));
 			
-			drawEllipse(majorWithClearance, minorWithClearance, x, y, "grey", ctx);
-			drawEllipse(major, minor, x, y, "black", ctx);
+			try{
+				drawEllipse(majorWithClearance, minorWithClearance, x, y, "grey", ctx);
+				drawEllipse(major, minor, x, y, "black", ctx);
+			} catch(e){
+				drawCircle(majorWithClearance, x, y, "grey", ctx);
+				drawCircle(major, x, y, "black", ctx);
+			}
 		}
 
 
@@ -90,7 +95,11 @@ var plottingService = {};
 			var minorPixels = beamline.cameraTubeDiameter/2/beamline.detector.YPixelMM;
 			var minor = scaleFactor*minorPixels;
 			
-			drawEllipse(major, minor, x, y, "rgba(245, 245, 220, 0.7)", ctx);
+			try{
+				drawEllipse(major, minor, x, y, "rgba(245, 245, 220, 0.7)", ctx);
+			} catch(e){
+				drawCircle(major, x, y, "rgba(245, 245, 220, 0.7)", ctx);
+			}
 		}
 		
 		
@@ -140,11 +149,11 @@ var plottingService = {};
             var j;
             ctx.lineWidth = xGap;
             for(i = moduleWidth, j = 1; j < numberOfHorizontalModules; i += moduleWidth + xGap, j++)
-            	drawLine(i, 0, i, detectorHeight, "violet", ctx);
+            	drawLine(i, 0, i, detectorHeight, "purple", ctx);
             
             ctx.lineWidth = yGap;
             for(i = moduleHeight, j = 1; j < numberOfVerticalModules; i += moduleHeight + yGap, j++)
-            	drawLine(0, i, detectorWidth, i, "violet", ctx);
+            	drawLine(0, i, detectorWidth, i, "purple", ctx);
             
             if(!missingModules) return;
             for(i in missingModules){
@@ -153,7 +162,7 @@ var plottingService = {};
             	var yIndex = Math.floor(index/numberOfHorizontalModules); 
             	var x = xIndex*(moduleWidth + xGap) - xGap;
             	var y = yIndex*(moduleHeight + yGap) - yGap;
-            	ctx.fillStyle = "violet";
+            	ctx.fillStyle = "purple";
         		ctx.fillRect(x, y, moduleWidth + xGap, moduleHeight + yGap);
             }
 		}
