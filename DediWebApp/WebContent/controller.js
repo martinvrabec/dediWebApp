@@ -3,11 +3,10 @@ var controller = {};
 (function(context){
 	var beamline = {};
 	var results = {};
-	var plottingSystem = {};
+	var plottingSystem = {};  // plotting system for the beamline configuration plot
 	
 	
 	$("#beamlineCanvas").ready(function(){
-		// Create the plotting system for the beamline configuration plot
 		plottingSystem = plottingService.createBeamlinePlottingSystem($("#beamlineCanvas"));
 	})
 	
@@ -21,13 +20,41 @@ var controller = {};
 		// Note there is no default for energy and wavelength, the fields are left blank by default
 		
 		
-		// Load preferences from the preference service
-		preferenceService.loadPreferences();
-		
-		
 		// Prevent users from typing into spinner widgets
 		$('input[type="number"]').keydown(function() {
 			return false;
+		});
+		
+		
+		// Load preferences from the preference service
+		preferenceService.loadPreferences(function(preferences){
+			if(preferences.detectors.length == 0) console.log("The server did not return any detectors. No detectors have been loaded.");
+	        else {
+	        	var defaultDetector = preferences.detectors[0];
+	        	var detectorsCombo = $('#detectorsCombo');
+	        	jQuery.each(preferences.detectors, function(){
+	                $('<option/>', {
+	                    'value': this.detectorName,
+	                    'text': this.detectorName,
+	                    'data-info': JSON.stringify(this)
+	                }).appendTo(detectorsCombo);
+	            });
+	        	if(preferences.beamlines.length == 0) console.log("The server did not return any beamline configuration templates. None will be used.");
+	            else {
+	            	var beamline = preferences.beamlines[0];
+	            	var beamlineTemplatesCombo = $('#beamlineTemplatesCombo');
+	            	for(var i in preferences.beamlines){
+	                 	preferences.beamlines[i].detector = defaultDetector;
+	            	}
+	            	jQuery.each(preferences.beamlines, function(){
+		                $('<option/>', {
+		                    'value': JSON.stringify(this),
+		                    'text': this.name
+		                }).appendTo(beamlineTemplatesCombo);
+		            });
+	                $('#beamlineTemplatesCombo').val(JSON.stringify(beamline)).change();
+	            }
+	        }
 		});
 	});
 	
