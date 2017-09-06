@@ -87,6 +87,10 @@ var controller = {};
 	 */
 	
 	 context.setBeamlineTemplate = function() {
+		// Store user-entered energy and wavelength
+		var energy = beamline.energy;
+		var wavelength = beamline.wavelength;
+		 
 		beamline = JSON.parse($('#beamlineTemplatesCombo').find(':selected').val());
 		
 		// Populate the entire UI with the values from the template.
@@ -124,8 +128,13 @@ var controller = {};
                    $("#scatteringQuantityUnit").val(), "q", "m^-1");
  	
 		// Reset energy and wavelength
-		$('#energy').val("");
-		$('#wavelength').val("");
+		if(energy == undefined || energy > beamline.maxEnergy || energy < beamline.minEnergy){
+			$('#energy').val("");
+			$('#wavelength').val("");
+		} else {
+			beamline.energy = energy;
+			beamline.wavelength = wavelength;
+		}
 		
 		// Recalculate the results and update the plot.
 		processInput();
