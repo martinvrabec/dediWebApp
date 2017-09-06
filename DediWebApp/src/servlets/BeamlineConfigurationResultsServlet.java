@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -24,7 +23,6 @@ import configuration.BeamlineConfiguration;
 import configuration.calculations.NumericRange;
 import configuration.calculations.QSpace;
 import configuration.calculations.geometry.Ray;
-import configuration.calculations.scattering.ScatteringQuantity;
 import configuration.devices.Beamstop;
 import configuration.devices.CameraTube;
 import configuration.devices.DetectorProperties;
@@ -226,28 +224,6 @@ public class BeamlineConfigurationResultsServlet extends HttpServlet {
 		return results;
     }
     
-    
-    public NumericRange convertRange(NumericRange range, ScatteringQuantity oldQuantity, ScatteringQuantity newQuantity, 
-            Unit<?> oldUnit, Unit<?> newUnit){
-		
-		if(range == null) return null;
-		
-		Double min = convertValue(range.getMin(), oldQuantity, newQuantity, oldUnit, newUnit);
-		Double max = convertValue(range.getMax(), oldQuantity, newQuantity, oldUnit, newUnit);
-		
-		return (min == null || max == null) ? null : new NumericRange(min, max);
-	}
-	
-	
-	public Double convertValue(Double value, ScatteringQuantity oldQuantity, ScatteringQuantity newQuantity, 
-                           Unit<?> oldUnit, Unit<?> newUnit){
-		if(value == null) return null;
-		oldQuantity.setValue(Amount.valueOf(value, oldUnit));
-		ScatteringQuantity newSQ = oldQuantity.to(newQuantity);
-		
-		return (newSQ == null) ? null : newSQ.getValue().to(newUnit).getEstimatedValue();
-	}
-	
 	
 	private Vector2d getPtForQ(double qvalue, double angle, double beamstopXCentreMM, 
 			                   double beamstopYCentreMM, double cameraLength, double wavelength){

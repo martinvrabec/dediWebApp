@@ -5,6 +5,10 @@ import java.io.Serializable;
 import configuration.devices.DiffractionDetector;
 
 
+/**
+ * Represents a beamline configuration in the form that is directly mapped to the fields 
+ * stored in the preferences. 
+ */
 public class BeamlineConfigurationBean implements Serializable {
 	/**
 	 * Update this when there are any serious changes to API
@@ -26,10 +30,6 @@ public class BeamlineConfigurationBean implements Serializable {
 	private double minCameraLength;
 	private double cameraLengthStepSize;
 	
-
-	public BeamlineConfigurationBean() {
-	}
-
 	
 	public String getName() {
 		return name;

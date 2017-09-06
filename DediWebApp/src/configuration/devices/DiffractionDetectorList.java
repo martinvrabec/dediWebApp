@@ -14,7 +14,7 @@ public class DiffractionDetectorList implements Serializable {
 	}
 
 	public DiffractionDetectorList() {
-		diffractionDetectors = new ArrayList<DiffractionDetector>();
+		diffractionDetectors = new ArrayList<>();
 	}
 	
 	public void setDiffractionDetectors(
