@@ -13,7 +13,7 @@ var controller = {};
 	
 	
 	$(document).ready(function(){
-		// Populate the UI with default values that are not part of the preferences service
+		// Populate the UI with default values that are not part of the preferences 
 		$('#angleunit').val("deg");
 		$('#angle').val(90);
 		$('#requestedMin').val(0);
@@ -21,7 +21,7 @@ var controller = {};
 		// Note there is no default for energy and wavelength, the fields are left blank by default
 		
 		
-		// Load preferences from the preferences service
+		// Load preferences from the preference service
 		preferenceService.loadPreferences();
 		
 		
@@ -33,7 +33,7 @@ var controller = {};
 	
 	
 	/*
-	 * The main processing function that sends the data from the UI (stored in the variable beamline) 
+	 * The main processing function that sends the data obtained from the UI (stored in the variable beamline) 
 	 * to the BeamlineConfigurationResultsServlet, waits for the results, and updates the web page with the results.
 	 */
 	function processInput(){
@@ -49,7 +49,7 @@ var controller = {};
 			}
 			context.displayRanges($("#scatteringQuantity").val(), $("#scatteringQuantityUnit").val());
 			plottingSystem.updatePlot(beamline, results);
-			plottingService.createResultsBar(beamline, $("#resultsCanvas")[0], results);
+			plottingService.createResultsBar(beamline, results, $("#resultsCanvas")[0]);
 		});	
 	}
 	
@@ -60,10 +60,6 @@ var controller = {};
 	 */
 	
 	 context.setBeamlineTemplate = function() {
-		// Save user-entered values that are not part of the template.
-		var energy = beamline.energy;
-		var wavelength = beamline.wavelength;
-		
 		beamline = JSON.parse($('#beamlineTemplatesCombo').find(':selected').val());
 		
 		// Populate the entire UI with the values from the template.
@@ -91,9 +87,7 @@ var controller = {};
 		beamline.minWavelength = math.unit(beamline.minWavelength, "nm").toNumber("m");
 		beamline.maxWavelength = math.unit(beamline.maxWavelength, "nm").toNumber("m");
 		
-		// Restore user-entered values
-		beamline.energy = energy;
-		beamline.wavelength = wavelength;
+		// Re-get user-entered values
 		beamline.angle = math.unit($('#angle').val(), $('#angleunit').val()).toNumber("rad");
 		beamline.requestedMin = 
 			scattering.convertBetweenScatteringQuantities($("#scatteringQuantity").val(), $('#requestedMin').val(),
@@ -102,6 +96,10 @@ var controller = {};
 			scattering.convertBetweenScatteringQuantities($("#scatteringQuantity").val(), $('#requestedMax').val(),
                    $("#scatteringQuantityUnit").val(), "q", "m^-1");
  	
+		// Reset energy and wavelength
+		$('#energy').val("");
+		$('#wavelength').val("");
+		
 		// Recalculate the results and update the plot.
 		processInput();
 	};
@@ -116,7 +114,7 @@ var controller = {};
 	
 	
 	context.setBeamstopXCentre = function() {
-		var element = document.getElementById("bsx");
+		var element = $("#bsx")[0];
 		var value = element.value
 		if(isNaN(value)){
 			element.value = element.oldValue;
@@ -129,7 +127,7 @@ var controller = {};
 
 
 	context.setBeamstopYCentre = function() {
-		var element = document.getElementById("bsy");
+		var element = $("#bsy")[0];
 		var value = element.value;
 		if(isNaN(value)){
 			element.value = element.oldValue;
@@ -142,13 +140,13 @@ var controller = {};
 
 
 	context.setClearance = function() {
-		beamline.clearance = document.getElementById("clearance").value;
+		beamline.clearance = $("#clearance").val();
 		processInput();
 	};
 
 
 	context.setCameraTubeXCentre = function() {
-		var element = document.getElementById("ctx");
+		var element = $("#ctx")[0];
 		var value = element.value;
 		if(isNaN(value)){
 			element.value = element.oldValue;
@@ -161,7 +159,7 @@ var controller = {};
 
 
 	context.setCameraTubeYCentre = function() {
-		var element = document.getElementById("cty");
+		var element = $("#cty")[0];
 		var value = element.value;
 		if(isNaN(value)){
 			element.value = element.oldValue;
@@ -174,27 +172,27 @@ var controller = {};
 
 
 	context.setAngle = function() {
-		var element = document.getElementById("angle");
+		var element = $("#angle")[0];
 		var value = element.value;
 		if(isNaN(value)){
 			element.value = element.oldValue;
 			alert("The angle must be a number.");
 			return;
 		}
-		beamline.angle = math.unit(parseFloat(value), document.getElementById("angleunit").value).toNumber("rad");
+		beamline.angle = math.unit(parseFloat(value), $("#angleunit").val()).toNumber("rad");
 		processInput();
 	};
 
 
 	context.setCameraLength = function() {
-		beamline.cameraLength = document.getElementById("cameraLength").value;
+		beamline.cameraLength = $("#cameraLength").val();
 		processInput();
 	};
 	
 	
 	context.setEnergy = function() {
-		var element = document.getElementById("energy");
-		var unit = document.getElementById("energyunit").value;
+		var element = $("#energy")[0];
+		var unit = $("#energyunit").val();
 		var maxEnergy = math.unit(beamline.maxEnergy, "keV").toNumber(unit);
 		var minEnergy = math.unit(beamline.minEnergy, "keV").toNumber(unit);
 		var value = element.value;
@@ -206,15 +204,14 @@ var controller = {};
 		}
 		beamline.energy = math.unit(parseFloat(value), unit).toNumber("keV");
 		beamline.wavelength = scattering.convertEnergyToWavelength(beamline.energy, "keV", "m");
-		document.getElementById("wavelength").value = 
-			math.unit(beamline.wavelength, "m").toNumber(document.getElementById("wavelengthunit").value).toFixed(3);
+		$("#wavelength").val(math.unit(beamline.wavelength, "m").toNumber($("#wavelengthunit").val()).toFixed(3));
 		processInput();
 	};
 	
 	
 	context.setWavelength = function() {
-		var element = document.getElementById("wavelength");
-		var unit = document.getElementById("wavelengthunit").value;
+		var element = $("#wavelength")[0];
+		var unit = $("#wavelengthunit").val();
 		var value = element.value;
 		var maxWavelength = math.unit(beamline.maxWavelength, "m").toNumber(unit);
 		var minWavelength = math.unit(beamline.minWavelength, "m").toNumber(unit);
@@ -226,14 +223,13 @@ var controller = {};
 		}
 		beamline.wavelength = math.unit(parseFloat(value), unit).toNumber("m");
 		beamline.energy = scattering.convertWavelengthToEnergy(beamline.wavelength, "m", "keV");	
-		document.getElementById("energy").value = 
-			math.unit(beamline.energy, "keV").toNumber(document.getElementById("energyunit").value).toFixed(3);
+		$("#energy").val(math.unit(beamline.energy, "keV").toNumber($("#energyunit").val()).toFixed(3));
 		processInput();
 	};
 
 	
 	context.setRequestedMin = function(){
-		var element = document.getElementById("requestedMin");
+		var element = $("#requestedMin")[0];
 		var value = element.value;
 		if(isNaN(value) || value < 0){
 			element.value = element.oldValue;
@@ -241,15 +237,15 @@ var controller = {};
 			return;
 		}
 		beamline.requestedMin = 
-			scattering.convertBetweenScatteringQuantities(document.getElementById("scatteringQuantity").value, value,
-					                                      document.getElementById("scatteringQuantityUnit").value, "q", "m^-1");
+			scattering.convertBetweenScatteringQuantities($("#scatteringQuantity").val(), value,
+					                                      $("#scatteringQuantityUnit").val(), "q", "m^-1");
 		checkRequestedMinMax();
 		processInput();
 	};
 	
 	
 	context.setRequestedMax = function(){
-		var element = document.getElementById("requestedMax");
+		var element = $("#requestedMax")[0];
 		var value = element.value;
 		if(isNaN(value) || value < 0){
 			element.value = element.oldValue;
@@ -257,8 +253,8 @@ var controller = {};
 			return;
 		}
 		beamline.requestedMax = 
-			scattering.convertBetweenScatteringQuantities(document.getElementById("scatteringQuantity").value, value,
-					                                      document.getElementById("scatteringQuantityUnit").value, "q", "m^-1");
+			scattering.convertBetweenScatteringQuantities($("#scatteringQuantity").val(), value,
+					                                      $("#scatteringQuantityUnit").val(), "q", "m^-1");
 		checkRequestedMinMax();
 		processInput();
 	};
@@ -279,11 +275,11 @@ var controller = {};
 		if(minVisible !== undefined && maxVisible !== undefined){
 			var convertedMinVisible = scattering.convertBetweenScatteringQuantities("q", minVisible, "m^-1", quantity, unit);
 		    var convertedMaxVisible = scattering.convertBetweenScatteringQuantities("q", maxVisible, "m^-1", quantity, unit);
-		    document.getElementById("visibleMin").innerHTML = Math.min(convertedMinVisible, convertedMaxVisible).toFixed(3);
-		    document.getElementById("visibleMax").innerHTML =  Math.max(convertedMinVisible, convertedMaxVisible).toFixed(3);
+		    $("#visibleMin").html(Math.min(convertedMinVisible, convertedMaxVisible).toFixed(3));
+		    $("#visibleMax").html(Math.max(convertedMinVisible, convertedMaxVisible).toFixed(3));
 		} else {
-			 document.getElementById("visibleMin").innerHTML = "";
-			 document.getElementById("visibleMax").innerHTML = "";
+			$("#visibleMin").html("");
+			$("#visibleMax").html("");
 		}
 				
 		var minRequested = beamline.requestedMin;
@@ -292,8 +288,8 @@ var controller = {};
 			scattering.convertBetweenScatteringQuantities("q", minRequested, "m^-1", quantity, unit);
 		var convertedMaxRequested = 
 			scattering.convertBetweenScatteringQuantities("q", maxRequested, "m^-1", quantity, unit);
-		document.getElementById("requestedMin").value = Math.min(convertedMinRequested, convertedMaxRequested).toFixed(3);
-		document.getElementById("requestedMax").value = Math.max(convertedMinRequested, convertedMaxRequested).toFixed(3);	
+		$("#requestedMin").val(Math.min(convertedMinRequested, convertedMaxRequested).toFixed(3));
+		$("#requestedMax").val(Math.max(convertedMinRequested, convertedMaxRequested).toFixed(3));	
 	}
 	
 	
@@ -302,37 +298,30 @@ var controller = {};
 	 */
 	
 	context.bsDiameterUnitChanged = function(){
-		document.getElementById("bsdiameter").value = 
-			math.unit(beamline.beamstopDiameter, "mm").toNumber(document.getElementById("bsdunit").value).toFixed(2);
+		$("#bsdiameter").val(math.unit(beamline.beamstopDiameter, "mm").toNumber($("#bsdunit").val()).toFixed(2));
 	};
 	
 	
 	context.ctDiameterUnitChanged = function(){
-		document.getElementById("ctdiameter").value = 
-			math.unit(beamline.cameraTubeDiameter, "mm").toNumber(document.getElementById("ctdunit").value).toFixed(2);
+		$("#ctdiameter").val(math.unit(beamline.cameraTubeDiameter, "mm").toNumber($("#ctdunit").val()).toFixed(2));
 	};
 	
 	
 	context.angleUnitChanged = function(){
-		if(beamline.angle != undefined){
-			document.getElementById("angle").value = 
-				math.unit(beamline.angle, "rad").toNumber(document.getElementById("angleunit").value).toFixed(2);
-		}
+		$("#angle").val(math.unit(beamline.angle, "rad").toNumber($("#angleunit").val()).toFixed(2));
 	};
 	
 
 	context.energyUnitChanged = function(){
 		if(beamline.energy != undefined){
-			document.getElementById("energy").value = 
-				math.unit(beamline.energy, "keV").toNumber(document.getElementById("energyunit").value).toFixed(3);
+			$("#energy").val(math.unit(beamline.energy, "keV").toNumber($("#energyunit").val()).toFixed(3));
 		}
 	};
 	
 	
 	context.wavelengthUnitChanged = function(){
 		if(beamline.wavelength != undefined){
-			document.getElementById("wavelength").value = 
-				math.unit(beamline.wavelength, "m").toNumber(document.getElementById("wavelengthunit").value).toFixed(3);
+			$("#wavelength").val(math.unit(beamline.wavelength, "m").toNumber($("#wavelengthunit").val()).toFixed(3));
 		}
 	};
 	

@@ -360,7 +360,7 @@ var plottingService = {};
 		/*
 		 * Returned public function createResultsBar.
 		 */
-		return function(bl, cvs, res){
+		return function(bl, res, cvs){
 			beamline = bl;
 			results = res;
 			canvas = cvs;
