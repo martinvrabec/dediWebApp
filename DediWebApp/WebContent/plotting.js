@@ -178,13 +178,11 @@ var plottingService = {};
 			var x0 = beamline.beamstopXCentre*scaleFactor;
 			var y0 = beamline.beamstopYCentre*scaleFactor;
 			
-			//var step = beamline.wavelength*beamline.cameraLength*1e12/(2*Math.PI);
-			var dx = canvas.width/10;
-			var dy = canvas.height/10;
-			var stepx = dx*beamline.detector.XPixelMM*(2*Math.PI)/(scaleFactor*beamline.wavelength*beamline.cameraLength*1e12)
-			var stepy = dy*beamline.detector.YPixelMM*(2*Math.PI)/(scaleFactor*beamline.wavelength*beamline.cameraLength*1e12)
-			/*var dx = scaleFactor*step/beamline.detector.XPixelMM;
-			var dy = scaleFactor*step/beamline.detector.YPixelMM;*/
+			var valueStep = math.unit(1, "nm^-1").toNumber($('#qUnitsCombo').val());
+			var step = 1e3*beamline.wavelength*beamline.cameraLength/(2*Math.PI)*math.unit(valueStep, $('#qUnitsCombo').val()).toNumber("m^-1");
+			
+			var dx = scaleFactor*step/beamline.detector.XPixelMM;
+			var dy = scaleFactor*step/beamline.detector.YPixelMM;
 			var width = canvas.width - offsetX;
 			var height = canvas.height - offsetY;
 			
@@ -197,7 +195,7 @@ var plottingService = {};
 				drawLine(x0 + i*dx, height, x0 + i*dx, -offsetY, colour, ctx);
 				if(i != 0){
 					drawLine(x0 + i*dx, y0 - 10, x0 + i*dx, y0 + 10, "black", ctx);
-					ctx.fillText((i*stepx).toFixed(2), x0 + i*dx, y0 -15); 
+					ctx.fillText((i*valueStep).toFixed(2), x0 + i*dx, y0 -15); 
 				}
 				i++;
 			}
@@ -209,7 +207,7 @@ var plottingService = {};
 				drawLine(-offsetX, y0 + i*dy, width, y0 + i*dy, colour, ctx);
 				if(i != 0){
 					drawLine(x0 - 10, y0 + i*dy, x0 + 10, y0 + i*dy, "black", ctx);
-					ctx.fillText((i*stepy).toFixed(2), x0 + 15, y0 + i*dy); 
+					ctx.fillText((i*valueStep).toFixed(2), x0 + 15, y0 + i*dy); 
 				}
 				i++;
 			}
@@ -242,11 +240,21 @@ var plottingService = {};
 		
 		
 		function createPlotControls(cvs){
-			cvs.after('<div class="textPanel" id="plotConfigurationPanel">' + 
-				    '<label> Zoom: </label> <input name="zoom" type="number" min="10" step="10" value="100"><br/>' +
-				    '<input type="checkbox" name="axes"> Show axes (in q [1/nm]) <br/>' +
-				    '<input type="checkbox" name="mask"> Plot detector mask' +
-				    '</div>');
+			cvs.after('<div class="textPanel" id="plotConfigurationPanel"></div>');
+			var panel = $('#plotConfigurationPanel');
+			panel.append('<label> Zoom: </label> <input name="zoom" type="number" min="10" step="10" value="100"><br/>');
+			panel.append('<input type="checkbox" name="axes"> Show axes (in q ');	 
+			panel.append('<select id="qUnitsCombo"></select>');
+			var qUnitsCombo = $('#qUnitsCombo');
+			jQuery.each(scattering.getUnitsFor("q"), function(){
+		                $('<option/>', {
+		                    'value': this.unit,
+		                    'text': this.label
+		                }).appendTo(qUnitsCombo);
+		            });
+			panel.append(') <br/>');
+			qUnitsCombo.change(redrawPlot);
+			panel.append('<input type="checkbox" name="mask"> Plot detector mask');
 		}
 		
 		
@@ -304,7 +312,10 @@ var plottingService = {};
 					updatePlot : function(bl, res){
 						beamline = bl;
 						results = res;
-						if(beamline.wavelength === undefined) $('input[name="axes"]').prop('disabled', true);
+						if(beamline.wavelength === undefined) {
+							$('input[name="axes"]').prop('disabled', true);
+							$('input[name="axes"]').prop('checked', false);
+						}
 						else $('input[name="axes"]').prop('disabled', false);
 						redrawPlot();
 					}
