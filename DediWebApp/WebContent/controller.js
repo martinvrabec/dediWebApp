@@ -27,7 +27,7 @@ var controller = {};
 		
 		
 		// Load preferences from the preference service
-		preferenceService.loadPreferences(function(preferences){
+		preferenceService.loadBeamlinePreferences(function(preferences){
 			if(preferences.detectors.length == 0) console.log("The server did not return any detectors. No detectors have been loaded.");
 	        else {
 	        	var defaultDetector = preferences.detectors[0];
@@ -104,7 +104,7 @@ var controller = {};
 		$('#cty').val(beamline.cameraTubeYCentre);
 		$('#cameraLength').attr("min", beamline.minCameraLength); 
 		$('#cameraLength').attr("max", beamline.maxCameraLength); 
-		$('#cameraLength').attr("step", beamline.camereLengthStepSize); 
+		$('#cameraLength').attr("step", beamline.cameraLengthStepSize); 
 		
 		// Default values not included in the template
 		beamline.cameraLength = beamline.minCameraLength;

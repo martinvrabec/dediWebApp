@@ -5,7 +5,7 @@
 var preferenceService = {};
 
 (function(context){
-	context.loadPreferences = function(callback) {
+	context.loadBeamlinePreferences = function(callback) {
 		var detectors = [];              // The list of available detectors
 		var beamlines = [];             // The list of pre-defined beamline configuration templates.
 
