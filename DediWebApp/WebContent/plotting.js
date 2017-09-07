@@ -230,6 +230,8 @@ var plottingService = {};
 		
 		function drawCalibrants(){
 			var calibrant = JSON.parse($('#calibrantsCombo').val());
+			var x = beamline.beamstopXCentre*scaleFactor;
+			var y = beamline.beamstopYCentre*scaleFactor;
 			for(var i in calibrant.HKLs){
 				var d = calibrant.HKLs[i].DNano;
 				var q = scattering.convertBetweenScatteringQuantities("d", d, "nm", "q", "m^-1");
@@ -238,8 +240,6 @@ var plottingService = {};
 				var major = scaleFactor*majorPixels;
 				var minorPixels = distanceMM/beamline.detector.YPixelMM;
 				var minor = scaleFactor*minorPixels;
-				var x = beamline.beamstopXCentre*scaleFactor;
-				var y = beamline.beamstopYCentre*scaleFactor;
 				
 				try{
 					drawEllipseOutline(major, minor, x, y, "black", ctx);

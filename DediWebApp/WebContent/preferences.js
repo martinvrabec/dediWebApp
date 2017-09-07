@@ -20,7 +20,6 @@ var preferenceService = {};
 		       url: "CalibrantsServlet",
 		       dataType: "json",
 		       success: function(response){
-		    	    debugger;
 		            callback(response);
 		        }
 		   });
