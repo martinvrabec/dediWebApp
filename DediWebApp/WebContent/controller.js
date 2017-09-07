@@ -27,26 +27,12 @@ var controller = {};
 		
 		
 		// Load preferences from the preference service
-		preferenceService.loadBeamlinePreferences(function(preferences){
-			if(preferences.detectors.length == 0) console.log("The server did not return any detectors. No detectors have been loaded.");
-	        else {
-	        	var defaultDetector = preferences.detectors[0];
-	        	var detectorsCombo = $('#detectorsCombo');
-	        	jQuery.each(preferences.detectors, function(){
-	                $('<option/>', {
-	                    'value': this.detectorName,
-	                    'text': this.detectorName,
-	                    'data-info': JSON.stringify(this)
-	                }).appendTo(detectorsCombo);
-	            });
-	        	if(preferences.beamlines.length == 0) console.log("The server did not return any beamline configuration templates. None will be used.");
+		preferenceService.loadBeamlinePreferences(function(beamlines){
+	        	if(beamlines.length == 0) console.log("The server did not return any beamline configuration templates.");
 	            else {
-	            	var beamline = preferences.beamlines[0];
+	            	var beamline = beamlines[0];
 	            	var beamlineTemplatesCombo = $('#beamlineTemplatesCombo');
-	            	for(var i in preferences.beamlines){
-	                 	preferences.beamlines[i].detector = defaultDetector;
-	            	}
-	            	jQuery.each(preferences.beamlines, function(){
+	            	jQuery.each(beamlines, function(){
 		                $('<option/>', {
 		                    'value': JSON.stringify(this),
 		                    'text': this.name
@@ -54,7 +40,6 @@ var controller = {};
 		            });
 	                $('#beamlineTemplatesCombo').val(JSON.stringify(beamline)).change();
 	            }
-	        }
 		});
 	});
 	
@@ -93,10 +78,23 @@ var controller = {};
 		 
 		beamline = JSON.parse($('#beamlineTemplatesCombo').find(':selected').val());
 		
+		
 		// Populate the entire UI with the values from the template.
-		$('#detectorsCombo').val(beamline.detector.detectorName);
-		$('#detectorResolution').html(beamline.detector.numberOfPixelsX + " x " + beamline.detector.numberOfPixelsY);
-	    $('#pixelSize').html(beamline.detector.XPixelMM + " x " + beamline.detector.YPixelMM);
+		$('#detectorsCombo').find('option').remove();
+		jQuery.each(beamline.detectors, function(){
+            $('<option/>', {
+                'value': this.detectorName,
+                'text': this.detectorName,
+                'data-info': JSON.stringify(this)
+            }).appendTo('#detectorsCombo');
+        });
+		if(beamline.detectors.length == 0) console.log("The selected beamline template is not associated with any detectors");
+        else {
+			beamline.detector = beamline.detectors[0];
+			$('#detectorsCombo').val(beamline.detector.detectorName);
+			$('#detectorResolution').html(beamline.detector.numberOfPixelsX + " x " + beamline.detector.numberOfPixelsY);
+		    $('#pixelSize').html(beamline.detector.XPixelMM + " x " + beamline.detector.YPixelMM);
+        }
 		$('#bsdunit').val("mm");
 		$('#bsdiameter').val(beamline.beamstopDiameter);
 		$('#bsx').val(beamline.beamstopXCentre);

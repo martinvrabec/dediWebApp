@@ -1,6 +1,7 @@
 package configuration;
 
 import java.io.Serializable;
+import java.util.List;
 
 import configuration.devices.DiffractionDetector;
 
@@ -16,7 +17,7 @@ public class BeamlineConfigurationBean implements Serializable {
 	private static final long serialVersionUID = -1133345866155946032L;
 	
 	private String name;
-	private DiffractionDetector detector;
+	private List<DiffractionDetector> detectors;
 	private double beamstopDiameter;
 	private double beamstopXCentre;
 	private double beamstopYCentre;
@@ -110,13 +111,13 @@ public class BeamlineConfigurationBean implements Serializable {
 	}
 
 
-	public DiffractionDetector getDetector() {
-		return detector;
+	public List<DiffractionDetector> getDetectors() {
+		return detectors;
 	}
 
 
-	public void setDetector(DiffractionDetector detector) {
-		this.detector = detector;
+	public void setDetectors(List<DiffractionDetector> detectors) {
+		this.detectors = detectors;
 	}
 
 
