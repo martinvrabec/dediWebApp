@@ -35,11 +35,27 @@ var plottingService = {};
 	}
 	
 	
+	function drawEllipseOutline(major, minor, x, y, colour, ctx){
+		ctx.beginPath();
+		ctx.ellipse(x, y, major, minor, 0, 0, 2 * Math.PI);
+		ctx.strokeStyle = colour;
+		ctx.stroke();
+	}
+	
+	
 	function drawCircle(radius, x, y, colour, ctx){
 		ctx.beginPath();
 		ctx.arc(x, y, radius, 0 , 2*Math.PI);
 	    ctx.fillStyle = colour;
 	    ctx.fill();
+	}
+	
+	
+	function drawCircleOutline(radius, x, y, colour, ctx){
+		ctx.beginPath();
+		ctx.arc(x, y, radius, 0 , 2*Math.PI);
+		ctx.strokeStyle = colour;
+		ctx.stroke();
 	}
 	
 	
@@ -54,9 +70,7 @@ var plottingService = {};
 		var scaleFactor = 1;
 		var offsetX = 0;
 		var offsetY = 0;
-		var zoom = 1;
-		var axesPlotted = false;
-		var maskPlotted = false;
+		
 		
 		/*
 		 * Private methods.
@@ -214,31 +228,57 @@ var plottingService = {};
 		}
 				
 		
+		function drawCalibrants(){
+			var calibrant = JSON.parse($('#calibrantsCombo').val());
+			for(var i in calibrant.HKLs){
+				var d = calibrant.HKLs[i].DNano;
+				var q = scattering.convertBetweenScatteringQuantities("d", d, "nm", "q", "m^-1");
+				var distanceMM = scattering.calculateDistanceFromQValue(q, beamline.cameraLength, beamline.wavelength)*1e3;
+				var majorPixels = distanceMM/beamline.detector.XPixelMM;
+				var major = scaleFactor*majorPixels;
+				var minorPixels = distanceMM/beamline.detector.YPixelMM;
+				var minor = scaleFactor*minorPixels;
+				var x = beamline.beamstopXCentre*scaleFactor;
+				var y = beamline.beamstopYCentre*scaleFactor;
+				
+				try{
+					drawEllipseOutline(major, minor, x, y, "black", ctx);
+				} catch(e){
+					drawCircleOutline(major, x, y, "black", ctx);
+				}
+			}
+		}
+		
+		
+		/**
+		 * Redraws the entire plot.
+		 */
 		function redrawPlot(){
 			if(beamline === undefined || beamline.detector === undefined){
 				clearPlot("black", ctx, canvas);
 				return;
 			}
-			axesPlotted = $('input[name="axes"]').is(':checked');
-			maskPlotted = $('input[name="mask"]').is(':checked');
-			zoom = $('input[name="zoom"]').val()/100;
 			var maxSide = Math.max(beamline.detector.numberOfPixelsX, beamline.detector.numberOfPixelsY);
 			scaleFactor = 800/maxSide;
 			canvas.width = beamline.detector.numberOfPixelsX*scaleFactor;
 			canvas.height = beamline.detector.numberOfPixelsY*scaleFactor;
-			scaleFactor *= zoom;
+			scaleFactor *= $('input[name="zoom"]').val()/100;
 			ctx = canvas.getContext("2d");
 			clearPlot("grey", ctx, canvas);
 			ctx.translate(offsetX, offsetY);
 			drawDetector();
 			drawCameraTube();
-			if(maskPlotted) drawMask();
-			if(axesPlotted) drawAxes();
 			drawBeamstop();
+			if($('input[name="mask"]').is(':checked')) drawMask();
+			if($('input[name="axes"]').is(':checked')) drawAxes();
+			if($('input[name="calibrants"]').is(':checked')) drawCalibrants();
 			drawRay();
 		}
 		
 		
+		/**
+		 * Creates any controls needed to configure the plot.
+		 */
 		function createPlotControls(cvs){
 			cvs.after('<div class="textPanel" id="plotConfigurationPanel"></div>');
 			var panel = $('#plotConfigurationPanel');
@@ -253,15 +293,29 @@ var plottingService = {};
 		                }).appendTo(qUnitsCombo);
 		            });
 			panel.append(') <br/>');
-			qUnitsCombo.change(redrawPlot);
-			panel.append('<input type="checkbox" name="mask"> Plot detector mask');
+			panel.append('<input type="checkbox" name="mask"> Plot detector mask <br>');
+			panel.append('<input type="checkbox" name="calibrants"> Show calibrant rings for ');
+			panel.append('<select id="calibrantsCombo"></select>');
+			preferenceService.loadCalibrants(function(calibrants){
+				if(calibrants.length == 0) console.log("The server did not return any calibrants.");
+	            else {
+	            	var calibrantsCombo = $('#calibrantsCombo');
+	            	jQuery.each(calibrants, function(){
+		                $('<option/>', {
+		                    'value': JSON.stringify(this),
+		                    'text': this.name
+		                }).appendTo(calibrantsCombo);
+		            });
+	            }
+			});
 		}
 		
 		
+		/**
+		 * Registers event handlers for events on the canvas and in the plot controls.
+		 */
 		function registerEventHandlers(){
-			$("#plotConfigurationPanel input").on("click change", function() {
-				redrawPlot();
-			});
+			$("#plotConfigurationPanel input, #plotConfigurationPanel select").on("click change", redrawPlot);
 			
 			var canvasX = 0;
 			var canvasY = 0;
@@ -280,8 +334,6 @@ var plottingService = {};
 			
 			
 			canvas.addEventListener('mousewheel', updateZoom, false);
-			
-			
 			canvas.addEventListener('DOMMouseScroll', updateZoom, false);
 			
 			
@@ -294,10 +346,9 @@ var plottingService = {};
 				$('input[name="zoom"]').val(newZoom);
 				redrawPlot();
 			}
-			
-			
-			$('input[name="axes"]').prop('disabled', true);
 		}
+		
+		
 		
 		/*
 		 * Returned public function createBeamlinePlottingSystem.
@@ -313,10 +364,10 @@ var plottingService = {};
 						beamline = bl;
 						results = res;
 						if(beamline.wavelength === undefined) {
-							$('input[name="axes"]').prop('disabled', true);
-							$('input[name="axes"]').prop('checked', false);
+							$('input[name="axes"], [name=calibrants]').prop('disabled', true);
+							$('input[name="axes"], [name=calibrants]').prop('checked', false);
 						}
-						else $('input[name="axes"]').prop('disabled', false);
+						else $('input[name="axes"], [name=calibrants]').prop('disabled', false);
 						redrawPlot();
 					}
 			};
@@ -326,6 +377,9 @@ var plottingService = {};
 	})();
 	
 	
+	/**
+	 * Draws a 1D diagram of the visible and requested ranges on the given canvas.
+	 */
 	module.createResultsBar = (function() {
 		/*
 		 * Private fields.

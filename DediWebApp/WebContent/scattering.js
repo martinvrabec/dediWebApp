@@ -83,6 +83,25 @@ var scattering = {};
 			return convertFromQ(newQuantity, convertToQ(oldQuantity, oldQuantityValue, oldQuantityUnit, "m^-1"), "m^-1", newQuantityUnit);
 	};
 	
+	
+	/**
+	 * <p> Calculates the distance between the point at which the incident beam hits the detector and the circle of points 
+	 * for which q equals the given q value.
+	 * Assumes that the detector's normal vector is parallel to the beam direction.
+	 * </p>
+	 * <p> Note: wavelength and qValue should have their units such that their product is unity 
+	 * (e.g. m and 1/m, or mm and 1/mm, but not, say, m and 1/mm).
+	 * The returned value will be in the same units as the given camera length.
+	 * </p>
+	 * 
+	 * @param qValue       - magnitude q of the scattering vector.
+	 * @param cameraLength - distance between the detector and the sample.
+	 * @param wavelength   - wavelength of the X-ray beam.
+	 */
+	context.calculateDistanceFromQValue = function(qValue, cameraLength, wavelength){
+		return Math.tan(2*Math.asin(wavelength*qValue/(4*Math.PI)))*cameraLength;
+	}
+	
 })(scattering);
 
 

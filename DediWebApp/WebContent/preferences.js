@@ -14,4 +14,15 @@ var preferenceService = {};
 	        }
 	   });
 	};
+	
+	context.loadCalibrants = function(callback) {
+		$.ajax({
+		       url: "CalibrantsServlet",
+		       dataType: "json",
+		       success: function(response){
+		    	    debugger;
+		            callback(response);
+		        }
+		   });
+	}
 })(preferenceService);
